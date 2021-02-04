@@ -1,0 +1,18 @@
+# This whole file will be placed to "Abstract" field in Geoserver.
+# That includes also these comments, so remember to clean them away!
+
+# Some things, marked here within {}, can be replaced with metadata
+# from the config file
+
+# The value of "title" for a specific composites
+Product: {product_title}
+
+# All other values are common to all layers created with a single
+# config file.  These keys/values are given in "common_items" dictionary
+# at the top level of the config.
+Satellite instrument: {sensor_title}
+Satellite orbit: {orbit_title}
+Covered area: {area_title}
+
+# And descriptive text specific for this particular product 
+Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.

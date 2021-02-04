@@ -1,0 +1,66 @@
+# Connection and workspace settings
+host: http://<geoserver URL>/geoserver/rest/
+user: <geoserver username>
+passwd: <geoserver password>
+workspace: <name of the workspace>
+
+# Restart the updater if the timeout, in minutes, is reached. Optional.
+# restart_timeout: 10
+
+# Internal path to directory within Geoserver where images are placed
+geoserver_target_dir: /opt/geoserver/data_dir
+# Write this WKT1 string to "/path/to/{file_basename}.prj". Optional.
+#   This is needed if there's no projection information (that is
+#   supported by Geoserver) in the image files.
+write_wkt: 'PROJCS["World_Eckert_IV",GEOGCS["WGS_1984",DATUM["WGS_1984",SPHEROID["WGS_1984",6378137.0,298.257223563]],PRIMEM["Greenwich",0.0],UNIT["degree",0.017453292519943295],AXIS["Longitude",EAST],AXIS["Latitude",NORTH]],PROJECTION["Eckert_IV"],PARAMETER["semi_minor",6378137.0],PARAMETER["central_meridian",0.0],UNIT["m",1.0],AXIS["x",EAST],AXIS["y",NORTH],AUTHORITY["EPSG","54012"]]'
+
+# Configuration for incoming messages
+topics:
+  - /topic/1
+  - /topic/2
+nameserver: localhost
+# addresses: [192.123.123.123:50000, 192.123.123.123:50001]
+
+# Mappings from composite names to layer names
+layers:
+  # "productname" in the Posttroll message -> layer name in Geoserver
+  airmass: airmass_layer
+  ash: ash_layer
+  cloud_phase_with_dust: cloud_phase_layer
+
+log_config:
+  version: 1
+  formatters:
+    fmt:
+      format: '[%(asctime)s %(levelname)-8s %(name)s] %(message)s'
+  handlers:
+    console:
+      class: logging.StreamHandler
+      level: DEBUG
+      formatter: fmt
+      stream: ext://sys.stdout
+    file:
+      class: logging.handlers.TimedRotatingFileHandler
+      level: DEBUG
+      formatter: fmt
+      filename: /path/to/log/dir/posttroll_adder.log
+      when: midnight
+      interval: 1
+      backupCount: 10
+  root:
+    level: DEBUG
+    propagate: false
+    handlers: [console, file]
+  loggers:
+    '':
+      level: DEBUG
+      handlers: [console, file]
+      propagate: false
+    'georest':
+      level: DEBUG
+      handlers: [console, file]
+      propagate: false
+    'georest.utils':
+      level: DEBUG
+      handlers: [console, file]
+      propagate: false

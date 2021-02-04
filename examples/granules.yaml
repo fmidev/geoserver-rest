@@ -1,0 +1,80 @@
+# Connection and workspace settings
+host: http://<geoserver URL>/geoserver/rest/
+user: <geoserver username>
+passwd: <geoserver password>
+workspace: <name of the workspace>
+store: <name of the layer>
+
+# Internal path to directory within Geoserver where images are placed
+geoserver_target_dir: /mnt/images/this/layers/own/directory
+
+# Path to the base of image directory _outside_ the Geoserver.
+# This is used when:
+#    only to write the WKT1 file, if configured
+#    to delete files from filesystem with delete_old_granules_and_files.py
+# exposed_base_dir: /path/to/somewhere
+
+# The pattern of the filenames
+#    20200812_0911_Meteosat-10_EPSG3035_airmass.tif
+#    20200812_0911_Meteosat-10_EPSG3035_ash.tif
+# ... and so on
+# This will be used to select the correct layer, and to check for
+#   identity (see below)
+file_pattern: "{start_time:%Y%m%d_%H%M}_{platform_name}_{areaname}_{productname}.{format}"
+
+# The filename part to use for layer identification
+layer_id: productname
+
+# For delete_old_granules_and_files.py
+#    Maximum age for granules, in minutes
+# max_age: 1440
+#    Delete also the files from filesystem.  Default: False.  Requires exposed_base_dir to be set
+# delete_files: true
+
+# Check for other file name parts for identity if there already is a file
+#   within the given time distance.  Do not add the image if all other parts match
+# identity_check_seconds: 300  # 5 minutes
+
+# Write this WKT1 string to "/path/to/{file_basename}.prj". Optional.
+#   This is needed if there's no projection information (that is
+#   supported by Geoserver) in the image files.
+# write_wkt: 'PROJCS["World_Eckert_IV",GEOGCS["WGS_1984",DATUM["WGS_1984",SPHEROID["WGS_1984",6378137.0,298.257223563]],PRIMEM["Greenwich",0.0],UNIT["degree",0.017453292519943295],AXIS["Longitude",EAST],AXIS["Latitude",NORTH]],PROJECTION["Eckert_IV"],PARAMETER["semi_minor",6378137.0],PARAMETER["central_meridian",0.0],UNIT["m",1.0],AXIS["x",EAST],AXIS["y",NORTH],AUTHORITY["EPSG","54012"]]'
+
+# Map layer_id's to the actual layer names
+layers:
+  airmass: satellite_geo_europe_seviri-15min_airmass
+  ash: satellite_geo_europe_seviri-15min_ash
+
+
+log_config:
+  version: 1
+  formatters:
+    fmt:
+      format: '[%(asctime)s %(levelname)-8s %(name)s] %(message)s'
+  handlers:
+    console:
+      class: logging.StreamHandler
+      level: DEBUG
+      formatter: fmt
+      stream: ext://sys.stdout
+    file:
+      class: logging.handlers.TimedRotatingFileHandler
+      level: DEBUG
+      formatter: fmt
+      filename: /path/to/log/dir/granules.log
+      when: midnight
+      interval: 1
+      backupCount: 10
+  loggers:
+    '':
+      level: DEBUG
+      handlers: [console, file]
+      propagate: false
+    'georest':
+      level: DEBUG
+      handlers: [console, file]
+      propagate: false
+    'georest.utils':
+      level: DEBUG
+      handlers: [console, file]
+      propagate: false

@@ -1,0 +1,128 @@
+# Connection and workspace settings
+host: http://<geoserver URL>/geoserver/rest/
+user: <geoserver username>
+passwd: <geoserver password>
+# The workspace will be created if it doesn't exist
+workspace: <workspace name>
+
+# Path to the base of image directory _outside_ the Geoserver.
+# If not set, current directory will be used.
+# By default, the layer directories ("name" in "layers" section below) will be
+# created within this directory, e.g. "/path/to/somewhere/name_of_layer_1/"
+exposed_base_dir: /path/to/somewhere
+# Optionally, do not create/use subdirectories for image layers
+# create_subdirectories: False
+
+
+# If the projection of the images in the layer directories are not
+#   directly readable from the files by Geoserver, the projection can
+#   be given as WKT1 string here.  The string will be written for all
+#   existing images before layers are created.
+#   This is optional, but will be used for every layer defined in this
+#   config.
+write_wkt: 'PROJCS["World_Eckert_IV",GEOGCS["WGS_1984",DATUM["WGS_1984",SPHEROID["WGS_1984",6378137.0,298.257223563]],PRIMEM["Greenwich",0.0],UNIT["degree",0.017453292519943295],AXIS["Longitude",EAST],AXIS["Latitude",NORTH]],PROJECTION["Eckert_IV"],PARAMETER["semi_minor",6378137.0],PARAMETER["central_meridian",0.0],UNIT["m",1.0],AXIS["x",EAST],AXIS["y",NORTH],AUTHORITY["EPSG","54012"]]'
+
+# Common items to all layers
+common_items:
+  sensor_title: SEVIRI
+  sensor_name: seviri
+  orbit_title: GEO
+  orbit_name: geo
+  area_title: Europe
+  area_name: europe
+  # If the "name" is not set, use this pattern instead
+  layer_pattern: "satellite_{orbit_name}_{area_name}_{sensor_name}_{product_name}"
+  # If "title" is not set for a layer, use this pattern instead
+  title_pattern: "Satellite {orbit_title} {area_title} {sensor_title} {product_title}"
+
+# Property files to be sent.
+properties:
+  indexer.properties:
+    TimeAttribute: &time_attribute
+      time
+    Schema: the_geom:Polygon,location:String,time:java.util.Date
+    Caching: "false"
+    AbsolutePath: "true"
+    PropertyCollectors: TimestampFileNameExtractorSPI[timeregex](time)
+  timeregex.properties:
+    regex: "[0-9]{8}_[0-9]{4}.*,format=yyyyMMdd_hhmm"
+  # Add these files to the ZIP package as additional initialization files
+  files:
+    - /tmp/20200402_1135_empty_EPSG3035.tif
+
+# Settings for the layer time dimension
+time_dimension:
+  # Needs to match with properties -> indexer -> TimeAttribute
+  name: *time_attribute
+  enabled: true
+  # Images are available regularly every 5 minutes
+  presentation: DISCRETE_INTERVAL
+  # Time resolution in milliseconds.  300000 = 5 minutes
+  resolution: 300000
+  units: ISO8601
+  nearestMatchEnabled: false
+
+# List of the mosaics to be created.
+# Layers will not be overwritten, but the metadata will be updated
+layers:
+  - name: name_of_layer_1
+    # These are the standard metadata each of the layer have.
+    # If not given, the default values will be used.
+    title: Title for layer 1
+    abstract: Short abstract for Layer 1.
+      Can be several lines long.
+      And so on.
+    keywords:
+      - keyword_1
+      - keyword_2
+
+  # No metadata will be added, so use an empty dictionary
+  # The "title_pattern" from "common_items" will be used if defined
+  - name: name_of_layer_2
+
+  # Layer name and title can be composed using key/vals from
+  # "common_items" and this layer's dictionary.
+  # If the "name" is not set here, it will be read from "common_items"
+  #   "layer_pattern"
+  - name: "satellite_{orbit_name}_{area_name}_{sensor_name}_{product_name}"
+    title: "Satellite {orbit_title} {area_title} {sensor_title} {product_title}"
+    # The abstract can also be a filename. Either relative to current
+    # directory or a full path.
+    abstract: abstract_text.txt
+    # This is used in the layer name above
+    product_name: name_of_the_product
+    # This is used in the layer title above
+    product_title: Name of the Product
+
+log_config:
+  version: 1
+  formatters:
+    fmt:
+      format: '[%(asctime)s %(levelname)-8s %(name)s] %(message)s'
+  handlers:
+    console:
+      class: logging.StreamHandler
+      level: DEBUG
+      formatter: fmt
+      stream: ext://sys.stdout
+    file:
+      class: logging.handlers.TimedRotatingFileHandler
+      level: DEBUG
+      formatter: fmt
+      filename: /path/to/log/dir/create_layers.log
+      when: midnight
+      interval: 1
+      backupCount: 10
+  loggers:
+    '':
+      level: DEBUG
+      handlers: [console, file]
+      propagate: false
+    'georest':
+      level: DEBUG
+      handlers: [console, file]
+      propagate: false
+    'georest.utils':
+      level: DEBUG
+      handlers: [console, file]
+      propagate: false
