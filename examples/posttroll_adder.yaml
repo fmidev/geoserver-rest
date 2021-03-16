@@ -14,6 +14,14 @@ geoserver_target_dir: /opt/geoserver/data_dir
 #   supported by Geoserver) in the image files.
 write_wkt: 'PROJCS["World_Eckert_IV",GEOGCS["WGS_1984",DATUM["WGS_1984",SPHEROID["WGS_1984",6378137.0,298.257223563]],PRIMEM["Greenwich",0.0],UNIT["degree",0.017453292519943295],AXIS["Longitude",EAST],AXIS["Latitude",NORTH]],PROJECTION["Eckert_IV"],PARAMETER["semi_minor",6378137.0],PARAMETER["central_meridian",0.0],UNIT["m",1.0],AXIS["x",EAST],AXIS["y",NORTH],AUTHORITY["EPSG","54012"]]'
 
+# This will be used, if also the below option is set, to check for
+#   identity of already existing images on Geoserver
+# file_pattern: "{start_time:%Y%m%d_%H%M}_{platform_name}_{areaname}_{productname}.{format}"
+# Check for other file name parts for identity if there already is a file
+#   within the given time distance.  Do not add the image if all other parts match
+# identity_check_seconds: 300  # 5 minutes
+
+
 # Configuration for incoming messages
 topics:
   - /topic/1

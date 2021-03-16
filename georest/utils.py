@@ -241,10 +241,16 @@ def _process_message(cat, config, msg):
     """Process posttroll message."""
     prod = msg.data["productname"]
     store = config["layers"].get(prod)
+    workspace = config["workspace"]
     config["store"] = store
+    identity_check_seconds = config.get("identity_check_seconds")
+
     fname = convert_file_path(config, msg.data["uri"])
     if store is None:
         logger.error("No layer name for '%s'", prod)
+        return
+    if file_in_granules(cat, workspace, store, fname,
+                        identity_check_seconds, config["file_pattern"]):
         return
     # Write WKT to file if configured
     write_wkt(config, fname)
