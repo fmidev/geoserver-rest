@@ -138,6 +138,7 @@ def test_run_posttroll_adder(connect_to_gs_catalog, write_wkt, add_granule,
     config = {"workspace": "satellite",
               "topics": ["/topic1", "/topic2"],
               "layers": {},
+              "file_pattern": "{base_filename}.{format}"
               }
     convert_file_path.return_value = "/mnt/data/image.tif"
     msg = mock.MagicMock(data={"productname": "airmass", "uri": "/path/to/image.tif"})
