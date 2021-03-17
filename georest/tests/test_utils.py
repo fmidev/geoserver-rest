@@ -125,12 +125,13 @@ def test_file_in_granules(georest):
         cat, workspace, store, file_path, identity_check_seconds, file_pattern)
 
 
+@mock.patch("georest.utils.file_in_granules")
 @mock.patch("georest.utils.convert_file_path")
 @mock.patch("georest.add_granule")
 @mock.patch("georest.utils.write_wkt")
 @mock.patch("georest.connect_to_gs_catalog")
 def test_run_posttroll_adder(connect_to_gs_catalog, write_wkt, add_granule,
-                             convert_file_path):
+                             convert_file_path, file_in_granules):
     """Test running posttroll adder."""
     from georest.utils import run_posttroll_adder
 
@@ -144,15 +145,35 @@ def test_run_posttroll_adder(connect_to_gs_catalog, write_wkt, add_granule,
     msg = mock.MagicMock(data={"productname": "airmass", "uri": "/path/to/image.tif"})
     Subscribe = mock.MagicMock()
     Subscribe.return_value.__enter__.return_value.recv.return_value = [None, msg]
+    file_in_granules.return_value = False
 
+    # Test with missing layers
     run_posttroll_adder(config, Subscribe)
     write_wkt.assert_not_called()
     add_granule.assert_not_called()
+    file_in_granules.assert_not_called()
 
     # Add "airmass" layer to config
     config["layers"]["airmass"] = "airmass_layer_name"
     Subscribe.return_value.__enter__.return_value.recv.return_value = [None, msg]
-
     run_posttroll_adder(config, Subscribe)
     write_wkt.assert_called_once()
     add_granule.assert_called_once()
+    file_in_granules.assert_called_once_with(
+        connect_to_gs_catalog.return_value,
+        config["workspace"],
+        config["layers"]["airmass"],
+        convert_file_path.return_value,
+        None,  # No "identity_check_seconds" set
+        config["file_pattern"])
+
+    # Set "identity_check_seconds"
+    config["identity_check_seconds"] = 60
+    run_posttroll_adder(config, Subscribe)
+    file_in_granules.assert_called_with(
+        connect_to_gs_catalog.return_value,
+        config["workspace"],
+        config["layers"]["airmass"],
+        convert_file_path.return_value,
+        config["identity_check_seconds"],
+        config["file_pattern"])
