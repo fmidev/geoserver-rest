@@ -34,6 +34,7 @@ def test_write_wkt():
 
     config = {"write_wkt": "mock WKT string"}
     with tempfile.TemporaryDirectory() as tempdir:
+        config["exposed_target_dir"] = tempdir
         tif_fname = os.path.join(tempdir, "image.tif")
         write_wkt(config, tif_fname)
         prj_fname = os.path.join(tempdir, "image.prj")
