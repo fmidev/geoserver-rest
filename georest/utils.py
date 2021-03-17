@@ -234,6 +234,8 @@ def _posttroll_adder_loop(config, Subscribe, restart_timeout):
                 latest_message_time = dt.datetime.utcnow()
                 _process_message(cat, config.copy(), msg)
         except KeyboardInterrupt:
+            pass
+        finally:
             return True
 
 
