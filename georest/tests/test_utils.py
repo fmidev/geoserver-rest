@@ -131,6 +131,7 @@ def test_file_in_granules(georest):
     with pytest.raises(ValueError):
         file_in_granules(cat, workspace, store, file_path, identity_check_seconds, file_pattern)
 
+
 @mock.patch("georest.utils.file_in_granules")
 @mock.patch("georest.utils.convert_file_path")
 @mock.patch("georest.add_granule")
@@ -161,7 +162,6 @@ def test_run_posttroll_adder(connect_to_gs_catalog, write_wkt, add_granule,
 
     # Add "airmass" layer to config
     config["layers"]["airmass"] = "airmass_layer_name"
-    Subscribe.return_value.__enter__.return_value.recv.return_value = [None, msg]
     run_posttroll_adder(config, Subscribe)
     write_wkt.assert_called_once()
     add_granule.assert_called_once()
@@ -191,8 +191,6 @@ def test_posttroll_adder_loop_return_value(connect_to_gs_catalog, process_messag
     """Test running posttroll adder."""
     from georest.utils import _posttroll_adder_loop
 
-    import datetime as dt
-
     config = {"workspace": "satellite",
               "topics": ["/topic1", "/topic2"],
               "layers": {"airmass": "airmass_layer_name"},
@@ -200,24 +198,19 @@ def test_posttroll_adder_loop_return_value(connect_to_gs_catalog, process_messag
               }
     msg = mock.MagicMock(data={"productname": "airmass", "uri": "/path/to/image.tif"})
     Subscribe = mock.MagicMock()
-    Subscribe.return_value.__enter__.return_value.recv.return_value = [None, msg]
+    Subscribe.return_value.__enter__.return_value.recv.return_value = [msg]
 
     # Timeout occurs
     restart_timeout = -1.0
     res = _posttroll_adder_loop(config, Subscribe, restart_timeout)
     assert res == False
 
-    # No timeout
-    restart_timeout = 1.0e3
-    res = _posttroll_adder_loop(config, Subscribe, restart_timeout)
-    assert res == False
-
     # Unhandled exception
     process_message.side_effect = IOError
-    res = _posttroll_adder_loop(config, Subscribe, restart_timeout)
+    res = _posttroll_adder_loop(config, Subscribe, None)
     assert res == False
 
     # KeyboardInterrupt is the only that should return True
     process_message.side_effect = KeyboardInterrupt
-    res = _posttroll_adder_loop(config, Subscribe, restart_timeout)
+    res = _posttroll_adder_loop(config, Subscribe, None)
     assert res == True
