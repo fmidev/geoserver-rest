@@ -232,7 +232,10 @@ def _posttroll_adder_loop(config, Subscribe, restart_timeout):
                     continue
                 logger.debug("New message received: %s", str(msg))
                 latest_message_time = dt.datetime.utcnow()
-                _process_message(cat, config.copy(), msg)
+                try:
+                    _process_message(cat, config.copy(), msg)
+                except ValueError:
+                    logger.warning("Filename pattern doesn't match.")
         except KeyboardInterrupt:
             pass
         finally:

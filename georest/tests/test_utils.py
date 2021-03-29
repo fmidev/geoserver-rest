@@ -10,6 +10,8 @@
 
 from unittest import mock
 
+import pytest
+
 
 def test_read_config():
     """Test reading a config file."""
@@ -124,6 +126,10 @@ def test_file_in_granules(georest):
     assert not file_in_granules(
         cat, workspace, store, file_path, identity_check_seconds, file_pattern)
 
+    # Filepattern and filename do not match
+    file_path = "/path/to/20200818_1200_europe_airmass.l1b"
+    with pytest.raises(ValueError):
+        file_in_granules(cat, workspace, store, file_path, identity_check_seconds, file_pattern)
 
 @mock.patch("georest.utils.file_in_granules")
 @mock.patch("georest.utils.convert_file_path")
