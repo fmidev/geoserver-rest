@@ -183,3 +183,41 @@ def test_run_posttroll_adder(connect_to_gs_catalog, write_wkt, add_granule,
         convert_file_path.return_value,
         config["identity_check_seconds"],
         config["file_pattern"])
+
+
+@mock.patch("georest.utils._process_message")
+@mock.patch("georest.connect_to_gs_catalog")
+def test_posttroll_adder_loop_return_value(connect_to_gs_catalog, process_message):
+    """Test running posttroll adder."""
+    from georest.utils import _posttroll_adder_loop
+
+    import datetime as dt
+
+    config = {"workspace": "satellite",
+              "topics": ["/topic1", "/topic2"],
+              "layers": {"airmass": "airmass_layer_name"},
+              "file_pattern": "{base_filename}.{format}",
+              }
+    msg = mock.MagicMock(data={"productname": "airmass", "uri": "/path/to/image.tif"})
+    Subscribe = mock.MagicMock()
+    Subscribe.return_value.__enter__.return_value.recv.return_value = [None, msg]
+
+    # Timeout occurs
+    restart_timeout = -1.0
+    res = _posttroll_adder_loop(config, Subscribe, restart_timeout)
+    assert res == False
+
+    # No timeout
+    restart_timeout = 1.0e3
+    res = _posttroll_adder_loop(config, Subscribe, restart_timeout)
+    assert res == False
+
+    # Unhandled exception
+    process_message.side_effect = IOError
+    res = _posttroll_adder_loop(config, Subscribe, restart_timeout)
+    assert res == False
+
+    # KeyboardInterrupt is the only that should return True
+    process_message.side_effect = KeyboardInterrupt
+    res = _posttroll_adder_loop(config, Subscribe, restart_timeout)
+    assert res == True

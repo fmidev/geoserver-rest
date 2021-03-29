@@ -217,6 +217,7 @@ def _posttroll_adder_loop(config, Subscribe, restart_timeout):
     services = config.get("services", "")
     nameserver = config.get("nameserver", "localhost")
     addresses = config.get("addresses")
+    return_value = False
     with Subscribe(services=services, topics=topics, nameserver=nameserver,
                    addresses=addresses, addr_listener=True) as sub:
         try:
@@ -227,7 +228,7 @@ def _posttroll_adder_loop(config, Subscribe, restart_timeout):
                     if time_since_last_msg > restart_timeout:
                         logger.debug("%.0f minutes since last message",
                                      time_since_last_msg)
-                        return False
+                        return return_value
                 if msg is None:
                     continue
                 logger.debug("New message received: %s", str(msg))
@@ -237,9 +238,9 @@ def _posttroll_adder_loop(config, Subscribe, restart_timeout):
                 except ValueError:
                     logger.warning("Filename pattern doesn't match.")
         except KeyboardInterrupt:
-            pass
+            return_value = True
         finally:
-            return True
+            return return_value
 
 
 def _process_message(cat, config, msg):
