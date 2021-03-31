@@ -26,8 +26,17 @@ write_wkt: 'PROJCS["World_Eckert_IV",GEOGCS["WGS_1984",DATUM["WGS_1984",SPHEROID
 topics:
   - /topic/1
   - /topic/2
+# The Posttroll nameserver to connect to for subscriptions.
+#   Alternatively set 'services: null' to not use nameserver
 nameserver: localhost
+# Name of the services to connect to.  Default: "" (connect to all services)
+#   To turn off, set to null
+# services: null
+# Addresses and ports to connect directly to
 # addresses: [192.123.123.123:50000, 192.123.123.123:50001]
+# Use address listener that makes it possible to connect to new services available on the nameserver.
+#   Default: True
+# use_address_listener: False
 
 # Mappings from composite names to layer names
 layers:
