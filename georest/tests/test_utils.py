@@ -214,3 +214,22 @@ def test_posttroll_adder_loop_return_value(connect_to_gs_catalog, process_messag
     process_message.side_effect = KeyboardInterrupt
     res = _posttroll_adder_loop(config, Subscribe, None)
     assert res == True
+
+
+@mock.patch("georest.utils._process_message")
+@mock.patch("georest.connect_to_gs_catalog")
+def test_posttroll_adder_loop_subscribe_config_options(connect_to_gs_catalog, process_message):
+    """Test that the Subscriber options are read from config."""
+    from georest.utils import _posttroll_adder_loop
+
+    msg = mock.MagicMock(data={"productname": "airmass", "uri": "/path/to/image.tif"})
+    Subscribe = mock.MagicMock()
+    Subscribe.return_value.__enter__.return_value.recv.return_value = [msg]
+
+    # Check that the config has been accessed for required info
+    config = mock.MagicMock()
+    _posttroll_adder_loop(config, Subscribe, None)
+    assert mock.call('services', '') in config.get.mock_calls
+    assert mock.call('nameserver', 'localhost') in config.get.mock_calls
+    assert mock.call('addresses') in config.get.mock_calls
+    assert mock.call('use_address_listener', True) in config.get.mock_calls
