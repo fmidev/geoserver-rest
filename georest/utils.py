@@ -217,7 +217,7 @@ def _posttroll_adder_loop(config, Subscribe, restart_timeout):
     services = config.get("services", "")
     nameserver = config.get("nameserver", "localhost")
     addresses = config.get("addresses")
-    addr_listener = config.get("address_listener", True)
+    addr_listener = config.get("use_address_listener", True)
     return_value = False
     with Subscribe(services=services, topics=topics, nameserver=nameserver,
                    addresses=addresses, addr_listener=addr_listener) as sub:

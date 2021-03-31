@@ -230,7 +230,6 @@ def test_posttroll_adder_loop_subscribe_config_options(connect_to_gs_catalog, pr
     config = mock.MagicMock()
     _posttroll_adder_loop(config, Subscribe, None)
     assert mock.call('services', '') in config.get.mock_calls
-    assert mock.call('nameserver', 'localhost')
     assert mock.call('nameserver', 'localhost') in config.get.mock_calls
     assert mock.call('addresses') in config.get.mock_calls
     assert mock.call('use_address_listener', True) in config.get.mock_calls
