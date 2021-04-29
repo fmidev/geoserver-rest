@@ -160,7 +160,7 @@ def file_in_granules(cat, workspace, store, file_path, identity_check_seconds, f
     file_pattern: Trollsift filename pattern.  If *identity_check_seconds* match,
                   also other filename parts are compared.  If all match, return True.
     """
-    if identity_check_seconds is not None:
+    if identity_check_seconds is not None and file_pattern is not None:
         store_obj = cat.get_store(store, workspace)
         coverage = georest.get_layer_coverage(cat, store, store_obj)
         granules = georest.get_layer_granules(cat, coverage, store_obj)
@@ -253,13 +253,14 @@ def _process_message(cat, config, msg):
     workspace = config["workspace"]
     config["store"] = store
     identity_check_seconds = config.get("identity_check_seconds")
+    file_pattern = config.get("file_pattern")
 
     fname = convert_file_path(config, msg.data["uri"])
     if store is None:
         logger.error("No layer name for '%s'", prod)
         return
     if file_in_granules(cat, workspace, store, fname,
-                        identity_check_seconds, config["file_pattern"]):
+                        identity_check_seconds, file_pattern):
         return
     # Write WKT to file if configured
     write_wkt(config, fname)

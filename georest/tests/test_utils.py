@@ -146,7 +146,6 @@ def test_run_posttroll_adder(connect_to_gs_catalog, write_wkt, add_granule,
     config = {"workspace": "satellite",
               "topics": ["/topic1", "/topic2"],
               "layers": {},
-              "file_pattern": "{base_filename}.{format}"
               }
     convert_file_path.return_value = "/mnt/data/image.tif"
     msg = mock.MagicMock(data={"productname": "airmass", "uri": "/path/to/image.tif"})
@@ -171,10 +170,11 @@ def test_run_posttroll_adder(connect_to_gs_catalog, write_wkt, add_granule,
         config["layers"]["airmass"],
         convert_file_path.return_value,
         None,  # No "identity_check_seconds" set
-        config["file_pattern"])
+        None)  # No "file_pattern" in config
 
-    # Set "identity_check_seconds"
+    # Set "identity_check_seconds" and "file_pattern" to config
     config["identity_check_seconds"] = 60
+    config["file_pattern"] = "{base_filename}.{format}"
     run_posttroll_adder(config, Subscribe)
     file_in_granules.assert_called_with(
         connect_to_gs_catalog.return_value,
@@ -194,7 +194,6 @@ def test_posttroll_adder_loop_return_value(connect_to_gs_catalog, process_messag
     config = {"workspace": "satellite",
               "topics": ["/topic1", "/topic2"],
               "layers": {"airmass": "airmass_layer_name"},
-              "file_pattern": "{base_filename}.{format}",
               }
     msg = mock.MagicMock(data={"productname": "airmass", "uri": "/path/to/image.tif"})
     Subscribe = mock.MagicMock()
