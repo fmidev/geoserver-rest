@@ -43,19 +43,21 @@ def test_collect_layer_metadata():
     from georest import _collect_layer_metadata
 
     config = {}
-    layer_config = {"bar": "bar2", "baz": "baz", "title_pattern": "title_pattern"}
+    layer_config = {"bar": "bar2", "baz": "baz", "title_pattern": "title_pattern", "cache_age_max": 86400}
 
     meta = _collect_layer_metadata(config, layer_config)
     assert meta["bar"] == layer_config["bar"]
     assert meta["baz"] == layer_config["baz"]
     assert meta["title"] == layer_config["title_pattern"]
+    assert meta["cache_age_max"] == 86400
 
-    config = {"common_items": {"foo": "foo", "bar": "bar1", "baz": "baz", "title": "title"}}
+    config = {"common_items": {"foo": "foo", "bar": "bar1", "baz": "baz", "title": "title", "cache_age_max": 86400}}
     layer_config = {"bar": "bar2", "title_pattern": "title_pattern"}
     meta = _collect_layer_metadata(config, layer_config)
     assert meta["foo"] == config["common_items"]["foo"]
     assert meta["baz"] == config["common_items"]["baz"]
     assert meta["title"] == config["common_items"]["title"]
+    assert meta["cache_age_max"] == config["common_items"]["cache_age_max"]
 
 
 def _create_extra_files(tempdir, files):
@@ -82,9 +84,13 @@ def test_create_layers(connect_to_gs_catalog, DimensionInfo, delete_granule):
     from geoserver.catalog import FailedRequestError
 
     cat = mock.MagicMock()
+    coverage = mock.MagicMock()
+    cat.get_resource.return_value = coverage
+
     connect_to_gs_catalog.return_value = cat
 
     config = {"workspace": "workspace",
+              "common_items": {"cache_age_max": 86400},
               "properties": {"foo": {"bar": "baz"}},
               "time_dimension": {"name": "name",
                                  "enabled": "enabled",
@@ -110,6 +116,8 @@ def test_create_layers(connect_to_gs_catalog, DimensionInfo, delete_granule):
     cat.get_resource.assert_called_with(store=config["layers"][0]["name"],
                                         workspace=config["workspace"])
     cat.save.assert_called_once()
+    assert "'cacheAgeMax', '86400'" in str(coverage.mock_calls)
+    assert "'cachingEnabled', 'true'" in str(coverage.mock_calls)
 
     # Layer exists, see that layer name is composed from a pattern
     cat.reset_mock()

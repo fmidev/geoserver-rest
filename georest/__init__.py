@@ -18,7 +18,7 @@ import trollsift
 from geoserver.catalog import Catalog, FailedRequestError
 from geoserver.support import DimensionInfo
 
-__version__ = "0.6.2"
+__version__ = "0.7.0"
 
 # These layer attributes can be set
 LAYER_ATTRIBUTES = ["title", "abstract", "keywords"]
@@ -111,6 +111,8 @@ def add_layer_metadata(cat, workspace, layer_name, time_dim, meta):
             setattr(coverage, attribute, attr)
 
     coverage = _add_time_dimension(coverage, time_dim)
+    coverage = _add_cache_age_max(coverage, meta.get("cache_age_max", None))
+
     # Save the added metadata
     cat.save(coverage)
     logger.info("Metadata written for layer '%s' on workspace '%s'",
@@ -166,6 +168,18 @@ def _add_time_dimension(coverage, time_dim):
         None,
         nearestMatchEnabled=time_dim["nearestMatchEnabled"])
     metadata['time'] = time_info
+    coverage.metadata = metadata
+
+    return coverage
+
+
+def _add_cache_age_max(coverage, cache_age_max):
+    """Add maximum cache age parameter to HTTP responses."""
+    if cache_age_max is None:
+        return coverage
+    metadata = coverage.metadata.copy()
+    metadata["cacheAgeMax"] = str(cache_age_max)
+    metadata["cachingEnabled"] = "true"
     coverage.metadata = metadata
 
     return coverage
