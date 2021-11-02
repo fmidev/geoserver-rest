@@ -22,7 +22,7 @@ exposed_base_dir: /path/to/somewhere
 #   config.
 write_wkt: 'PROJCS["World_Eckert_IV",GEOGCS["WGS_1984",DATUM["WGS_1984",SPHEROID["WGS_1984",6378137.0,298.257223563]],PRIMEM["Greenwich",0.0],UNIT["degree",0.017453292519943295],AXIS["Longitude",EAST],AXIS["Latitude",NORTH]],PROJECTION["Eckert_IV"],PARAMETER["semi_minor",6378137.0],PARAMETER["central_meridian",0.0],UNIT["m",1.0],AXIS["x",EAST],AXIS["y",NORTH],AUTHORITY["EPSG","54012"]]'
 
-# Common items to all layers
+# Common items to all layers.  These can be overridden layer-by-layer
 common_items:
   sensor_title: SEVIRI
   sensor_name: seviri
@@ -34,6 +34,8 @@ common_items:
   layer_pattern: "satellite_{orbit_name}_{area_name}_{sensor_name}_{product_name}"
   # If "title" is not set for a layer, use this pattern instead
   title_pattern: "Satellite {orbit_title} {area_title} {sensor_title} {product_title}"
+  # Uncomment to set cache age setting (in seconds) for HTTP header responses
+  # cache_age_max: 86400
 
 # Property files to be sent.
 properties:
