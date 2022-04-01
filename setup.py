@@ -8,8 +8,18 @@
 from georest import __version__
 from setuptools import find_packages, setup
 
-requires = ['requests', 'gisdata', 'six', 'future', 'pyyaml',
-            'geoserver-restconfig', 'trollsift']
+requires = [
+    'pyyaml',
+    'geoserver-restconfig',
+    'trollsift',
+]
+extras_require = {
+    'posttroll': ['pyzmq'],
+}
+all_extras = []
+for extra_deps in extras_require.values():
+    all_extras.extend(extra_deps)
+extras_require['all'] = list(set(all_extras))
 
 NAME = 'georest'
 README = open('README.md', 'r').read()
@@ -23,6 +33,7 @@ setup(name=NAME,
       version=__version__,
       packages=find_packages(),
       install_requires=requires,
+      extras_require=extras_require,
       python_requires='>=3.4',
       data_files=[],
       zip_safe=False,
