@@ -15,9 +15,10 @@ import pytest
 
 def test_read_config():
     """Test reading a config file."""
-    from georest.utils import read_config
-    import tempfile
     import os
+    import tempfile
+
+    from georest.utils import read_config
 
     config = """foo: bar"""
     with tempfile.TemporaryDirectory() as tempdir:
@@ -30,9 +31,10 @@ def test_read_config():
 
 def test_write_wkt():
     """Test that WKT files are written."""
-    from georest.utils import write_wkt
-    import tempfile
     import os
+    import tempfile
+
+    from georest.utils import write_wkt
 
     config = {"write_wkt": "mock WKT string"}
     with tempfile.TemporaryDirectory() as tempdir:
@@ -45,10 +47,11 @@ def test_write_wkt():
 
 def test_write_wkt_for_files():
     """Test writing WKT files for existing files."""
-    from georest.utils import write_wkt_for_files
-    import tempfile
-    import os
     import glob
+    import os
+    import tempfile
+
+    from georest.utils import write_wkt_for_files
 
     config = {"write_wkt": "mock WKT string"}
 
@@ -202,17 +205,17 @@ def test_posttroll_adder_loop_return_value(connect_to_gs_catalog, process_messag
     # Timeout occurs
     restart_timeout = -1.0
     res = _posttroll_adder_loop(config, Subscribe, restart_timeout)
-    assert res == False
+    assert res is False
 
     # Unhandled exception
     process_message.side_effect = IOError
     res = _posttroll_adder_loop(config, Subscribe, None)
-    assert res == False
+    assert res is False
 
     # KeyboardInterrupt is the only that should return True
     process_message.side_effect = KeyboardInterrupt
     res = _posttroll_adder_loop(config, Subscribe, None)
-    assert res == True
+    assert res is True
 
 
 @mock.patch("georest.utils._process_message")
