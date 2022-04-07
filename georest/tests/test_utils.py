@@ -15,9 +15,10 @@ import pytest
 
 def test_read_config():
     """Test reading a config file."""
-    from georest.utils import read_config
-    import tempfile
     import os
+    import tempfile
+
+    from georest.utils import read_config
 
     config = """
         foo: bar
@@ -79,9 +80,10 @@ def test_read_config_default_credentials():
 
 def test_write_wkt():
     """Test that WKT files are written."""
-    from georest.utils import write_wkt
-    import tempfile
     import os
+    import tempfile
+
+    from georest.utils import write_wkt
 
     config = {"write_wkt": "mock WKT string"}
     with tempfile.TemporaryDirectory() as tempdir:
@@ -94,10 +96,11 @@ def test_write_wkt():
 
 def test_write_wkt_for_files():
     """Test writing WKT files for existing files."""
-    from georest.utils import write_wkt_for_files
-    import tempfile
-    import os
     import glob
+    import os
+    import tempfile
+
+    from georest.utils import write_wkt_for_files
 
     config = {"write_wkt": "mock WKT string"}
 
