@@ -20,13 +20,62 @@ def test_read_config():
 
     from georest.utils import read_config
 
-    config = """foo: bar"""
+    config = """
+        foo: bar
+        user: user1
+        passwd: passwd1
+    """
     with tempfile.TemporaryDirectory() as tempdir:
         config_file = os.path.join(tempdir, "config.yaml")
         with open(config_file, "w") as fid:
             fid.write(config)
         res = read_config(config_file)
         assert res["foo"] == "bar"
+        assert res["user"] == "user1"
+        assert res["passwd"] == "passwd1"
+
+
+def test_read_config_credentials_in_env():
+    """Test reading a config file when user/passwd are given in environment variables."""
+    from georest.utils import read_config
+    import tempfile
+    import os
+
+    os.environ["GEOSERVER_USER"] = "user1"
+    os.environ["GEOSERVER_PASSWORD"] = "passwd1"
+    config = """
+        foo: bar
+    """
+    with tempfile.TemporaryDirectory() as tempdir:
+        config_file = os.path.join(tempdir, "config.yaml")
+        with open(config_file, "w") as fid:
+            fid.write(config)
+        res = read_config(config_file)
+        assert res["foo"] == "bar"
+        assert res["user"] == "user1"
+        assert res["passwd"] == "passwd1"
+
+
+def test_read_config_default_credentials():
+    """Test reading a config file when user/passwd are not given."""
+    from georest.utils import read_config
+    import tempfile
+    import os
+
+    os.environ.pop("GEOSERVER_USER", None)
+    os.environ.pop("GEOSERVER_PASSWORD", None)
+
+    config = """
+        foo: bar
+    """
+    with tempfile.TemporaryDirectory() as tempdir:
+        config_file = os.path.join(tempdir, "config.yaml")
+        with open(config_file, "w") as fid:
+            fid.write(config)
+        res = read_config(config_file)
+        assert res["foo"] == "bar"
+        assert res["user"] == "admin"
+        assert res["passwd"] == "geoserver"
 
 
 def test_write_wkt():

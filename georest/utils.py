@@ -28,6 +28,10 @@ def read_config(fname):
     """Read configuration file."""
     with open(fname, 'r') as fid:
         config = yaml.load(fid, yaml.SafeLoader)
+    if "user" not in config:
+        config["user"] = os.environ.get("GEOSERVER_USER", "admin")
+    if "passwd" not in config:
+        config["passwd"] = os.environ.get("GEOSERVER_PASSWORD", "geoserver")
     return config
 
 
@@ -243,7 +247,7 @@ def _posttroll_adder_loop(config, Subscribe, restart_timeout):
         except KeyboardInterrupt:
             return_value = True
         finally:
-            return return_value
+            return return_value  # noqa:B012
 
 
 def _process_message(cat, config, msg):

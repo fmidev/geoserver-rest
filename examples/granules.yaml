@@ -1,6 +1,8 @@
 # Connection and workspace settings
 host: http://<geoserver URL>/geoserver/rest/
+# Also possible via GEOSERVER_USER env variable. If neither are given, the default "admin" will be used
 user: <geoserver username>
+# Also possible via GEOSERVER_PASSWORD env variable. If neither are given, the default "geoserver" will be used
 passwd: <geoserver password>
 workspace: <name of the workspace>
 store: <name of the layer>
