@@ -7,19 +7,19 @@
 
 """Utility functions for georest."""
 
-import os
-import shutil
-import zipfile
-import tempfile
+import datetime as dt
+import glob
 import logging
 import logging.config
-import glob
-import datetime as dt
+import os
+import shutil
+import tempfile
+import zipfile
 
-import yaml
 import trollsift
-import georest
+import yaml
 
+import georest
 
 logger = logging.getLogger(__name__)
 
@@ -41,21 +41,20 @@ def delete_temp(temp_path):
     logger.debug("Temporary file deleted")
 
 
-def create_property_files(config):
+def create_property_files(config, metadata=None):
     """Create .property files, save them to zip and return the path to it."""
-    # Create a temporary directory
     logger.debug("Creating property files")
     path = tempfile.mkdtemp()
     zip_path = os.path.join(path, "data.zip")
     properties = config["properties"]
 
-    prop_paths = _write_property_files(properties, path)
+    prop_paths = _write_property_files(properties, path, metadata)
     _write_property_zip(prop_paths, zip_path)
 
     return zip_path
 
 
-def _write_property_files(properties, path):
+def _write_property_files(properties, path, metadata):
     """Write *properties* to a file in *path*."""
     prop_paths = []
     for prop in properties:
@@ -67,6 +66,8 @@ def _write_property_files(properties, path):
             with open(prop_path, 'w') as fid:
                 for key, value in properties[prop].items():
                     data = "%s=%s\n" % (key, value)
+                    if metadata:
+                        data = trollsift.compose(data, metadata, allow_partial=True)
                     fid.write(data)
             logger.debug("Wrote '%s'", prop)
             prop_paths.append(prop_path)

@@ -5,8 +5,9 @@
 
 """Setup file for georest."""
 
-from georest import __version__
 from setuptools import find_packages, setup
+
+from georest import __version__
 
 requires = [
     'pyyaml',
@@ -38,6 +39,7 @@ setup(name=NAME,
       data_files=[],
       zip_safe=False,
       scripts=['bin/create_layers.py',
+               'bin/create_s3_layers.py',
                'bin/add_granule.py',
                'bin/delete_granule.py',
                'bin/delete_old_granules_and_files.py',
