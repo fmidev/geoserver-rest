@@ -24,6 +24,9 @@ __version__ = "0.7.0"
 # These layer attributes can be set
 LAYER_ATTRIBUTES = ["title", "abstract", "keywords"]
 LAYER_TIME_FORMAT = "%Y-%m-%dT%H:%M:%S.%f%z"
+S3_PROPERTY_URL = "{host}workspaces/{workspace}/coveragestores/{layer_name}/file.imagemosaic?configure=none"
+S3_PROTOTYPE_URL = "{host}workspaces/{workspace}/coveragestores/{layer_name}/remote.imagemosaic"
+S3_COVERAGE_URL = "{host}workspaces/{workspace}/coveragestores/{layer_name}/coverages"
 
 logger = logging.getLogger(__name__)
 
@@ -207,7 +210,7 @@ def _create_s3_layers(config, property_file, meta):
 
 
 def _send_properties(config, property_file, meta):
-    url = trollsift.compose(config['property_url'], meta)
+    url = trollsift.compose(S3_PROPERTY_URL, meta)
     headers = {'Content-type': 'application/zip'}
     auth = (config['user'], config['passwd'])
     with open(property_file, 'rb') as data:
@@ -215,7 +218,7 @@ def _send_properties(config, property_file, meta):
 
 
 def _add_prototype_granule(config, meta):
-    url = trollsift.compose(config['prototype_url'], meta)
+    url = trollsift.compose(S3_PROTOTYPE_URL, meta)
     data = meta['prototype_image']
     headers = {'Content-type': 'text/plain'}
     auth = (config['user'], config['passwd'])
@@ -224,7 +227,7 @@ def _add_prototype_granule(config, meta):
 
 def _configure_coverage(config, meta):
     coverage_xml = _create_coverage_xml(config, meta)
-    url = trollsift.compose(config['coverage_url'], meta)
+    url = trollsift.compose(S3_COVERAGE_URL, meta)
     headers = {'Content-type': 'text/xml'}
     auth = (config['user'], config['passwd'])
     _ = requests.post(url, data=coverage_xml, headers=headers, auth=auth)
