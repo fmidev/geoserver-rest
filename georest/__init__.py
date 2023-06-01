@@ -403,7 +403,7 @@ def _delete_id_from_gs(cat, workspace, store, store_obj, granule):
 
 def _delete_files_from_fs(config, gs_location):
     delete_files = config.get("delete_files", False)
-    if delete_files:
+    if not delete_files:
         return
     fs_path = utils.convert_file_path(config, gs_location, inverse=True)
     _delete_file_from_fs(config, fs_path)
