@@ -16,6 +16,8 @@ requires = [
 ]
 extras_require = {
     'posttroll': ['pyzmq'],
+    's3': ['requests'],
+
 }
 all_extras = []
 for extra_deps in extras_require.values():

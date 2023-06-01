@@ -43,6 +43,7 @@ There are two scipts related to layer creation:
     - If used, should be run before the layers are created
 - `create_layers.py` - creates ImageMosaic layers to Geoserver
 - `create_s3_layers.py` - creates ImageMosaic layers to Geoserver when the imagery are in an S3 bucket
+    - additional `requests` library will be needed
 
 The first to scripts can use the same configuration file.
 
