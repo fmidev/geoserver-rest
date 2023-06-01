@@ -42,16 +42,18 @@ There are two scipts related to layer creation:
     - The sub-directory creation is optional, but might be useful for splitting the data to reduce the amount of files in a single directory. This script is just a helper to create them programmatically via a configuration file
     - If used, should be run before the layers are created
 - `create_layers.py` - creates ImageMosaic layers to Geoserver
+- `create_s3_layers.py` - creates ImageMosaic layers to Geoserver when the imagery are in an S3 bucket
 
-Both of the scripts can use the same configuration file.
+The first to scripts can use the same configuration file.
 
 ### Configuration file template
 
 The example configuration file can be found from the [`examples/create_layers.yaml`](./examples/create_layers.yaml) file. The inline comments should have all the required information.
+Similarly for the S3 case, there is [`examples/create_s3_layers.yaml`](./examples/create_s3_layers.yaml) example config with inline comments.
 
 #### Layer description template
 
-The description text, known by Geoserver as abstract, can be located on a text file. An example is included in [`example/abstract_text.txt`](./examples/abstract_text.txt). In this file, there are placeholders enclosed in curly braces. When used, these placeholders are replaced with the key/value pairs listed in `common_items` dictionary in `create_layers.yaml`. As an example `Sensor: {sensor_title}` would be composed to `Sensor: SEVIRI`. The sole exception is the human readable name, aka. "title",  of the layer (`{product_title}` as placeholder) which will be replaced with the layer's `title` setting in the configuration YAML file.
+The description text, known by Geoserver as abstract, can be located on a text file. An example is included in [`example/abstract_text.txt`](./examples/abstract_text.txt). In this file, there are placeholders enclosed in curly braces. When used, these placeholders are replaced with the key/value pairs listed in `common_items` dictionary in `create_layers.yaml` (or `create_s3_layers.yaml`). As an example `Sensor: {sensor_title}` would be composed to `Sensor: SEVIRI`. The sole exception is the human readable name, aka. "title",  of the layer (`{product_title}` as placeholder) which will be replaced with the layer's `title` setting in the configuration YAML file or formed from `title_pattern`.
 
 NOTE: After the composition, the abstract text will be as-is, so the comments (lines starting with `#`) should be removed!
 
@@ -67,15 +69,19 @@ This script doesn't interact with Geoserver in any way. Also, note that after th
 
 ### Creating ImageMosaic layers
 
-When creating ImageMosaic layers, there needs to be at least one image in each of the directories so that Geoserver can determine the projection and extent of the layer. The images can be either proper images pre-copied to the directories, or uploaded by the layer creation script (see keyword `files` in `properties` section of [`examples/create_layers.yaml](./examples/create_layers.yaml) for an example). If uploaded with the script, it is better to use empty images so the files are smaller. If the image does not have a geolocation information within, additional file containing a single-line WKT1 string with identical filename but with an ending `.prj` needs to be also supplied.
+When creating ImageMosaic layers, there needs to be at least one image in each of the directories so that Geoserver can determine the projection and extent of the layer. The images can be either proper images pre-copied to the directories, or uploaded by the layer creation script (see keyword `files` in `properties` section of [`examples/create_layers.yaml](./examples/create_layers.yaml) for an example). For S3 case, the prototype image is used from the linked bucket and given per-layer in the `layers` portion of `create_s3_layers.yaml`. If uploaded with the script, it is better to use empty images so the files are smaller. If the image does not have a geolocation information within, additional file containing a single-line WKT1 string with identical filename but with an ending `.prj` needs to be also supplied. As the S3 case uses COG plugin, valid cloud-optimized geotiff images are expected, and no `.prj` files should be necessary.
 
 The layers are created with
 
     create_layers.py /path/to/create_layers.yaml
 
-If there are any errors, the erroring layers and all the associated files need to be deleted from Geoserver before attempting again with a fixed configuration file. The layers can be removed via the web UI, but the remaining files need to be cleaned via commandline filesystem access.
+or for S3 case
 
-Any existing layers are left as-is, and will not be overwritten. The script will also create the workspace if it doesn't exist.
+    create_s3_layers.py /path/to/create_s3_layers.yaml
+
+If there are any errors, the erroring layers and all the associated files need to be deleted from Geoserver before attempting again with a fixed configuration file. The layers can be removed via the web UI, but the remaining files need to be cleaned via commandline filesystem access. Possibly also the linked database need to be cleaned.
+
+Any existing layers are left as-is, and will not be overwritten. The scripts will also create the workspace if it doesn't exist.
 
 ## Adding new images to existing layers
 

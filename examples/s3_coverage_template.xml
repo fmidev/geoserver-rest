@@ -1,0 +1,21 @@
+<coverage>
+  <name>{layer_name}</name>
+  <nativeName>{layer_name}</nativeName>
+  <title>{title}</title>
+  <abstract>{abstract}</abstract>
+  <enabled>true</enabled>
+  <advertised>true</advertised>
+  <metadata>
+    <entry key="cacheAgeMax">86400</entry>
+    <entry key="time">
+      <dimensionInfo>
+        <enabled>true</enabled>
+        <presentation>DISCRETE_INTERVAL</presentation>
+	<resolution>600000</resolution>
+        <units>ISO8601</units>
+	<nearestMatchEnabled>false</nearestMatchEnabled>
+      </dimensionInfo>
+    </entry>
+    <entry key="cachingEnabled">true</entry>
+  </metadata>
+</coverage>
