@@ -317,3 +317,57 @@ def test_delete_file_from_mosaic(connect_to_gs_catalog):
 
     delete_file_from_mosaic(config, fname)
     cat.delete_granule.assert_called()
+
+
+@mock.patch("georest.requests")
+def test_create_s3_layers(requests):
+    """Test creating layers from S3 data."""
+    from georest import create_s3_layers
+
+    config = {
+        "host": "http://host/",
+        "user": "user",
+        "passwd": "passwd",
+        "workspace": "workspace",
+        "common_items": {
+            "layer_pattern": "layer_pattern",
+            "title_pattern": "title_pattern",
+        },
+        "coverage_template": "coverage_template",
+        "properties": {
+            "property1": {"prop1": "prop1"},
+            "property2": {"prop2": "prop2"},
+
+        },
+        "layers": [
+            {
+                "product_name": "product_name",
+                "product_title": "product_title",
+                "prototype_image": "https://bucket.host/image.tif",
+                "abstract": "abstract",
+            }
+        ]
+        }
+
+    create_s3_layers(config)
+
+    first_call = requests.mock_calls[0]
+    url = 'http://host/workspaces/workspace/coveragestores/layer_pattern/file.imagemosaic?configure=none'
+    assert first_call.args[0] == url
+    assert 'data' in first_call.kwargs
+    assert first_call.kwargs["headers"] == {'Content-type': 'application/zip'}
+    assert first_call.kwargs["auth"] == ('user', 'passwd')
+    second_call = requests.mock_calls[1]
+    url = 'http://host/workspaces/workspace/coveragestores/layer_pattern/remote.imagemosaic'
+    assert second_call.args[0] == url
+    expected = {'data': 'https://bucket.host/image.tif',
+                'headers': {'Content-type': 'text/plain'},
+                'auth': ('user', 'passwd')}
+    assert second_call.kwargs == expected
+    third_call = requests.mock_calls[2]
+    url = 'http://host/workspaces/workspace/coveragestores/layer_pattern/coverages'
+    assert third_call.args[0] == url
+    expected = {'data': 'coverage_template',
+                'headers': {'Content-type': 'text/xml'},
+                'auth': ('user', 'passwd')}
+    assert third_call.kwargs == expected
