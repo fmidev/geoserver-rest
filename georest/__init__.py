@@ -8,21 +8,28 @@
 """Interface to Geoserver REST API."""
 
 
-import os
-import logging
 import datetime as dt
+import logging
+import os
 
-from georest import utils
-
+try:
+    import requests
+except ImportError:
+    requests = None
 import trollsift
 from geoserver.catalog import Catalog, FailedRequestError
 from geoserver.support import DimensionInfo
+
+from georest import utils
 
 __version__ = "0.7.0"
 
 # These layer attributes can be set
 LAYER_ATTRIBUTES = ["title", "abstract", "keywords"]
 LAYER_TIME_FORMAT = "%Y-%m-%dT%H:%M:%S.%f%z"
+S3_PROPERTY_URL = "{host}workspaces/{workspace}/coveragestores/{layer_name}/file.imagemosaic?configure=none"
+S3_PROTOTYPE_URL = "{host}workspaces/{workspace}/coveragestores/{layer_name}/remote.imagemosaic"
+S3_COVERAGE_URL = "{host}workspaces/{workspace}/coveragestores/{layer_name}/coverages"
 
 logger = logging.getLogger(__name__)
 
@@ -57,9 +64,12 @@ def create_layers(config):
 def _collect_layer_metadata(config, layer_config):
     """Collect metadata for adding it to a layer."""
     meta = config.get("common_items", dict()).copy()
+    meta['host'] = config['host']
     meta.update(layer_config)
     if "title" not in meta and "title_pattern" in meta:
         meta["title"] = meta["title_pattern"]
+    meta["layer_name"] = trollsift.compose(meta.get("name", meta.get("layer_pattern")), meta)
+    meta["workspace"] = config["workspace"]
     return meta
 
 
@@ -76,7 +86,7 @@ def _create_layers(config, cat, property_file):
     # Create all the configured layers and add time dimension
     for layer_config in config["layers"]:
         meta = _collect_layer_metadata(config, layer_config)
-        layer_name = trollsift.compose(meta.get("name", meta.get("layer_pattern")), meta)
+        layer_name = meta['layer_name']
         if layer_name is None:
             logger.error("No layer name defined!")
             logger.error("Config items: %s", str(meta))
@@ -183,6 +193,62 @@ def _add_cache_age_max(coverage, cache_age_max):
     coverage.metadata = metadata
 
     return coverage
+
+
+def create_s3_layers(config):
+    """Create all configured layers for S3 based imagery."""
+    for layer_config in config["layers"]:
+        meta = _collect_layer_metadata(config, layer_config)
+        property_file = utils.create_property_files(config, metadata=meta)
+        try:
+            _create_s3_layers(config, property_file, meta)
+        finally:
+            utils.delete_temp(property_file)
+
+
+def _create_s3_layers(config, property_file, meta):
+    if requests is None:
+        raise ImportError("'requests' is needed for S3 layer creation.")
+    _send_properties(config, property_file, meta)
+    _add_prototype_granule(config, meta)
+    _configure_coverage(config, meta)
+
+
+def _send_properties(config, property_file, meta):
+    url = trollsift.compose(S3_PROPERTY_URL, meta)
+    headers = {'Content-type': 'application/zip'}
+    auth = (config['user'], config['passwd'])
+    with open(property_file, 'rb') as data:
+        _ = requests.put(url, data=data, headers=headers, auth=auth)
+
+
+def _add_prototype_granule(config, meta):
+    url = trollsift.compose(S3_PROTOTYPE_URL, meta)
+    data = meta['prototype_image']
+    headers = {'Content-type': 'text/plain'}
+    auth = (config['user'], config['passwd'])
+    _ = requests.post(url, data=data, headers=headers, auth=auth)
+
+
+def _configure_coverage(config, meta):
+    coverage_xml = _create_coverage_xml(config, meta)
+    url = trollsift.compose(S3_COVERAGE_URL, meta)
+    headers = {'Content-type': 'text/xml'}
+    auth = (config['user'], config['passwd'])
+    _ = requests.post(url, data=coverage_xml, headers=headers, auth=auth)
+
+
+def _create_coverage_xml(config, meta):
+    template = config['coverage_template']
+    try:
+        with open(template, 'r') as fid:
+            template = fid.read()
+    except (FileNotFoundError, TypeError):
+        pass
+    meta['title'] = trollsift.compose(meta['title_pattern'], meta)
+    meta['abstract'] = trollsift.compose(_get_and_clean_attribute(meta['abstract']), meta)
+
+    return trollsift.compose(template, meta)
 
 
 def get_layer_coverage(cat, store, store_obj):

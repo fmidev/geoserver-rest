@@ -5,31 +5,48 @@ on:
   - pull_request
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  test:
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: true
       matrix:
-        python-version: ["3.7", "3.8", "3.9"]
+        os: ["ubuntu-latest"]
+        python-version: ["3.9", "3.10", "3.11"]
         experimental: [false]
+
+    env:
+      PYTHON_VERSION: ${{ matrix.python-version }}
+      OS: ${{ matrix.os }}
+      UNSTABLE: ${{ matrix.experimental }}
+      ACTIONS_ALLOW_UNSECURE_COMMANDS: true
+
     steps:
       - name: Checkout source
         uses: actions/checkout@v2
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
+
+      - name: Setup Conda Environment
+        uses: conda-incubator/setup-miniconda@v2
         with:
+          miniforge-variant: Mambaforge
+          miniforge-version: latest
+          use-mamba: true
           python-version: ${{ matrix.python-version }}
-      - name: Install dependencies
-        run: |
-          pip install -U pytest pytest-cov requests gisdata six future pyyaml trollsift geoserver-restconfig
+          environment-file: continuous_integration/environment.yaml
+          activate-environment: test-environment
+
       - name: Install georest
+        shell: bash -l {0}
         run: |
           pip install --no-deps -e .
+
       - name: Run tests
+        shell: bash -l {0}
         run: |
           pytest --cov=georest georest/tests --cov-report=xml
+
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v1
+        uses: codecov/codecov-action@v3
         with:
+          flags: unittests
           file: ./coverage.xml
-          env_vars: PYTHON_VERSION
+          env_vars: OS,PYTHON_VERSION

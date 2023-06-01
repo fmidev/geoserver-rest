@@ -1,0 +1,82 @@
+# Connection and workspace settings
+host: http://<hostname>/geoserver/rest/
+user: 
+passwd: 
+# The workspace will be created if it doesn't exist
+workspace: dev
+
+coverage_template: /path/to/s3_coverage_template.xml
+
+# Common items to all layers
+common_items:
+  sensor_title: FCI 10 min
+  sensor_name: fci-10min
+  orbit_title: GEO
+  orbit_name: geo
+  area_title: Europe
+  area_name: eur
+  # Use same layer naming scheme for all layers
+  layer_pattern: "sat_{orbit_name}_{area_name}_{sensor_name}_{product_name}"
+  # Use same Title scheme for all layers
+  title_pattern: "Satellite {orbit_title} {area_title} {sensor_title} {product_title}"
+  time_interval: 10 minutes
+
+# Property files to be sent.
+properties:
+  indexer.properties:
+    # We are using the COG community plugin in Geoserver, make sure to install it
+    Cog: true
+    CanBeEmpty: true
+    TimeAttribute: time
+    Schema: the_geom:Polygon,location:String,time:java.util.Date
+    Caching: "false"
+    AbsolutePath: "true"
+    PropertyCollectors: TimestampFileNameExtractorSPI[timeregex](time)
+    # The layer name will be expanded by the library
+    Name: "{layer_name}"
+  timeregex.properties:
+    regex: ".*([0-9]{8}_[0-9]{4}).*,format=yyyyMMdd_HHmm"
+  files:
+    - /path/to/datastore.properties
+
+# List of layers to be created.
+layers:
+  - product_name: airmass
+    product_title: Airmass
+    # The prototype image should be available in a bucket
+    prototype_image: https://<bucket>.<bucket host>/20170920_0000_MTGI-1_EPSG3035_airmass.tif
+    # The optional abstract text can be inline, or available in a file
+    abstract: /path/to/abstracts/abstract_airmass.txt
+  - product_name: night_microphysical
+    product_title: Night microphysical, night-side only
+    prototype_image: https://<bucket>.<bucket host>/20170920_0000_MTGI-1_EPSG3035_night_microphysical.tif
+    abstract: /path/to/abstracts/abstract_airmass.txt
+  - product_name: true_color
+    product_title: True color, day-side only
+    prototype_image: https://<bucket>.<bucket host>/20170920_0000_MTGI-1_EPSG3035_true_color.tif
+    abstract: /path/to/abstracts/abstract_airmass.txt
+
+log_config:
+  version: 1
+  formatters:
+    fmt:
+      format: '[%(asctime)s %(levelname)-8s %(name)s] %(message)s'
+  handlers:
+    console:
+      class: logging.StreamHandler
+      level: DEBUG
+      formatter: fmt
+      stream: ext://sys.stdout
+  loggers:
+    '':
+      level: DEBUG
+      handlers: [console]
+      propagate: false
+    'georest':
+      level: DEBUG
+      handlers: [console]
+      propagate: false
+    'georest.utils':
+      level: DEBUG
+      handlers: [console]
+      propagate: false

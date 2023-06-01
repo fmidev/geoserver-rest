@@ -5,8 +5,9 @@
 
 """Setup file for georest."""
 
-from georest import __version__
 from setuptools import find_packages, setup
+
+from georest import __version__
 
 requires = [
     'pyyaml',
@@ -15,6 +16,8 @@ requires = [
 ]
 extras_require = {
     'posttroll': ['pyzmq'],
+    's3': ['requests'],
+
 }
 all_extras = []
 for extra_deps in extras_require.values():
@@ -34,10 +37,11 @@ setup(name=NAME,
       packages=find_packages(),
       install_requires=requires,
       extras_require=extras_require,
-      python_requires='>=3.4',
+      python_requires='>=3.9',
       data_files=[],
       zip_safe=False,
       scripts=['bin/create_layers.py',
+               'bin/create_s3_layers.py',
                'bin/add_granule.py',
                'bin/delete_granule.py',
                'bin/delete_old_granules_and_files.py',
