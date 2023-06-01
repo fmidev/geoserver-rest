@@ -12,6 +12,10 @@ import datetime as dt
 import logging
 import os
 
+try:
+    import requests
+except ImportError:
+    requests = None
 import trollsift
 from geoserver.catalog import Catalog, FailedRequestError
 from geoserver.support import DimensionInfo
@@ -203,14 +207,14 @@ def create_s3_layers(config):
 
 
 def _create_s3_layers(config, property_file, meta):
+    if requests is None:
+        raise ImportError("'requests' is needed for S3 layer creation.")
     _send_properties(config, property_file, meta)
     _add_prototype_granule(config, meta)
     _configure_coverage(config, meta)
 
 
 def _send_properties(config, property_file, meta):
-    import requests
-
     url = trollsift.compose(S3_PROPERTY_URL, meta)
     headers = {'Content-type': 'application/zip'}
     auth = (config['user'], config['passwd'])
@@ -219,8 +223,6 @@ def _send_properties(config, property_file, meta):
 
 
 def _add_prototype_granule(config, meta):
-    import requests
-
     url = trollsift.compose(S3_PROTOTYPE_URL, meta)
     data = meta['prototype_image']
     headers = {'Content-type': 'text/plain'}
@@ -229,8 +231,6 @@ def _add_prototype_granule(config, meta):
 
 
 def _configure_coverage(config, meta):
-    import requests
-
     coverage_xml = _create_coverage_xml(config, meta)
     url = trollsift.compose(S3_COVERAGE_URL, meta)
     headers = {'Content-type': 'text/xml'}
