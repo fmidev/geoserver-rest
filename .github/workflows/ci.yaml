@@ -40,7 +40,7 @@ jobs:
           pip install --no-deps -e .
 
       - name: Run tests
-        shell -l {0}
+        shell: bash -l {0}
         run: |
           pytest --cov=georest georest/tests --cov-report=xml
 
