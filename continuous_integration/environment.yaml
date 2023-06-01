@@ -1,0 +1,12 @@
+name: test-environment
+channels:
+  - conda-forge
+dependencies:
+  - pytest
+  - pytest-cov
+  - requests
+  - gisdata
+  - future
+  - pyyaml
+  - trollsift
+  - geoserver-restconfig
