@@ -241,6 +241,9 @@ def test_get_layer_coverage():
 
 
 ADD_FILE_TO_MOSAIC_CONFIG = {
+    "host": "http://host/",
+    "user": "user",
+    "passwd": "passwd",
     "workspace": "satellite",
     "geoserver_target_dir": "/mnt/data",
     "file_pattern": "{area}_{productname}.tif",
@@ -311,6 +314,33 @@ def test_add_file_to_mosaic_failed_request(connect_to_gs_catalog):
     # Check that failed request is handled
     add_granule.side_effect = FailedRequestError
     add_file_to_mosaic(config, fname_in)
+
+
+@mock.patch("georest.requests")
+@mock.patch("georest.utils.file_in_granules")
+@mock.patch("georest.connect_to_gs_catalog")
+def test_add_file_to_mosaic_s3(connect_to_gs_catalog, file_in_granules, requests):
+    """Test adding a file to image mosaic when data are in S3 object storage."""
+    from georest import add_file_to_mosaic
+
+    config = deepcopy(ADD_FILE_TO_MOSAIC_CONFIG)
+
+    # Returns False if the file isn't in database
+    file_in_granules.return_value = False
+    add_granule = mock.MagicMock()
+    cat = mock.MagicMock(add_granule=add_granule)
+    connect_to_gs_catalog.return_value = cat
+
+    fname_in = "https://bucket.host/europe_airmass.tif"
+
+    add_file_to_mosaic(config, fname_in, filesystem='s3')
+
+    call = requests.mock_calls[0]
+    assert call.args[0] == "http://host/workspaces/satellite/coveragestores/airmass_store/remote.imagemosaic"
+    expected = {'data': '/mnt/data/europe_airmass.tif',
+                'headers': {'Content-type': 'text/plain'},
+                'auth': ('user', 'passwd')}
+    assert call.kwargs == expected
 
 
 @mock.patch("georest.connect_to_gs_catalog")

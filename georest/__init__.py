@@ -28,7 +28,7 @@ __version__ = "0.7.0"
 LAYER_ATTRIBUTES = ["title", "abstract", "keywords"]
 LAYER_TIME_FORMAT = "%Y-%m-%dT%H:%M:%S.%f%z"
 S3_PROPERTY_URL = "{host}workspaces/{workspace}/coveragestores/{layer_name}/file.imagemosaic?configure=none"
-S3_PROTOTYPE_URL = "{host}workspaces/{workspace}/coveragestores/{layer_name}/remote.imagemosaic"
+S3_GRANULE_URL = "{host}workspaces/{workspace}/coveragestores/{layer_name}/remote.imagemosaic"
 S3_COVERAGE_URL = "{host}workspaces/{workspace}/coveragestores/{layer_name}/coverages"
 
 logger = logging.getLogger(__name__)
@@ -223,7 +223,7 @@ def _send_properties(config, property_file, meta):
 
 
 def _add_prototype_granule(config, meta):
-    url = trollsift.compose(S3_PROTOTYPE_URL, meta)
+    url = trollsift.compose(S3_GRANULE_URL, meta)
     data = meta['prototype_image']
     headers = {'Content-type': 'text/plain'}
     auth = (config['user'], config['passwd'])
@@ -275,7 +275,7 @@ def get_layer_granules(cat, coverage, store_obj):
     return granules
 
 
-def add_file_to_mosaic(config, fname_in):
+def add_file_to_mosaic(config, fname_in, filesystem='posix'):
     """Add a file to image mosaic.
 
     This function wraps some boilerplate around adding a granule to a layer.
@@ -292,10 +292,21 @@ def add_file_to_mosaic(config, fname_in):
                               identity_check_seconds, config["file_pattern"]):
         return
 
-    # Write WKT to file if configured
-    utils.write_wkt(config, fname_in)
     # Add the granule metadata to Geoserver
-    add_granule(cat, workspace, store, fname)
+    if filesystem == 'posix':
+        # Write WKT to file if configured
+        utils.write_wkt(config, fname_in)
+        add_granule(cat, workspace, store, fname)
+    elif filesystem == 's3':
+        meta = {
+            'host': config['host'],
+            'workspace': workspace,
+            'layer_name': store,
+            'prototype_image': fname,
+        }
+        add_s3_granule(config, meta)
+    else:
+        raise NotImplementedError("Can't add granules to filesystem '%s'" % filesystem)
 
 
 def add_granule(cat, workspace, store, file_path):
@@ -313,6 +324,11 @@ def add_granule(cat, workspace, store, file_path):
                     os.path.basename(file_path), workspace, store)
     except (FailedRequestError, ConnectionRefusedError) as err:
         logger.error("Adding granule '%s' failed: %s", file_path, str(err))
+
+
+def add_s3_granule(config, meta):
+    """Add a file in S3 bucket to image mosaic."""
+    _add_prototype_granule(config, meta)
 
 
 def _get_store_name_from_filename(config, fname):
