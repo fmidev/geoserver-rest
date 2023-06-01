@@ -24,7 +24,7 @@ jobs:
           pip install -U pytest pytest-cov requests gisdata six future pyyaml trollsift geoserver-restconfig
       - name: Install georest
         run: |
-          pip install --no-deps -e .
+          pip install -e .
       - name: Run tests
         run: |
           pytest --cov=georest georest/tests --cov-report=xml
