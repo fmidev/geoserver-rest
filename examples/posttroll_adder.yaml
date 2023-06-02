@@ -9,6 +9,9 @@ workspace: <name of the workspace>
 # Restart the updater if the timeout, in minutes, is reached. Optional.
 # restart_timeout: 10
 
+# Select the filesystem type. The options are "filesystem" (default) and "s3"
+# filesystem: s3
+
 # Internal path to directory within Geoserver where images are placed
 geoserver_target_dir: /opt/geoserver/data_dir
 # Write this WKT1 string to "/path/to/{file_basename}.prj". Optional.

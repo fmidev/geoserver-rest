@@ -259,6 +259,7 @@ def _process_message(cat, config, msg):
     config["store"] = store
     identity_check_seconds = config.get("identity_check_seconds")
     file_pattern = config.get("file_pattern")
+    filesystem = config.get("filesystem", "posix")
 
     fname = convert_file_path(config, msg.data["uri"])
     if store is None:
@@ -267,7 +268,18 @@ def _process_message(cat, config, msg):
     if file_in_granules(cat, workspace, store, fname,
                         identity_check_seconds, file_pattern):
         return
-    # Write WKT to file if configured
-    write_wkt(config, fname)
-    # Add the granule metadata to Geoserver
-    georest.add_granule(cat, config["workspace"], store, fname)
+    if filesystem == "posix":
+        # Write WKT to file if configured
+        write_wkt(config, fname)
+        # Add the granule metadata to Geoserver
+        georest.add_granule(cat, config["workspace"], store, fname)
+    elif filesystem == "s3":
+        meta = {
+            'host': config['host'],
+            'workspace': workspace,
+            'layer_name': store,
+            'prototype_image': fname,
+        }
+        georest.add_s3_granule(config, meta)
+    else:
+        raise NotImplementedError("Can't add granules to filesystem '%s'" % filesystem)

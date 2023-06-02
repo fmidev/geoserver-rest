@@ -240,33 +240,34 @@ def test_get_layer_coverage():
     assert res == coverages["coverages"]["coverage"][1]
 
 
+ADD_FILE_TO_MOSAIC_CONFIG = {
+    "host": "http://host/",
+    "user": "user",
+    "passwd": "passwd",
+    "workspace": "satellite",
+    "geoserver_target_dir": "/mnt/data",
+    "file_pattern": "{area}_{productname}.tif",
+    "layer_id": "productname",
+    "layers": {"airmass": "airmass_store"},
+    }
+
+
 @mock.patch("georest.utils.file_in_granules")
 @mock.patch("georest.connect_to_gs_catalog")
 def test_add_file_to_mosaic(connect_to_gs_catalog, file_in_granules):
     """Test adding files to image mosaic."""
-    from geoserver.catalog import FailedRequestError
-
     from georest import add_file_to_mosaic
 
+    config = deepcopy(ADD_FILE_TO_MOSAIC_CONFIG)
+
+    # Returns False if the file isn't in database
+    file_in_granules.return_value = False
     add_granule = mock.MagicMock()
     cat = mock.MagicMock(add_granule=add_granule)
     connect_to_gs_catalog.return_value = cat
 
-    config = {"workspace": "satellite",
-              "geoserver_target_dir": "/mnt/data",
-              "file_pattern": "{area}_{productname}.tif",
-              "layer_id": "productname",
-              "layers": {"airmass": "airmass_store"},
-              }
     fname_in = "/path/to/europe_airmass.tif"
 
-    # The file is already added, should not re-add it
-    file_in_granules.return_value = True
-    add_file_to_mosaic(config, fname_in)
-    add_granule.assert_not_called()
-
-    # A new file
-    file_in_granules.return_value = False
     add_file_to_mosaic(config, fname_in)
 
     connect_to_gs_catalog.assert_called_with(config)
@@ -274,9 +275,72 @@ def test_add_file_to_mosaic(connect_to_gs_catalog, file_in_granules):
                                    "airmass_store", "satellite")
     add_file_to_mosaic(config, fname_in)
 
+
+@mock.patch("georest.utils.file_in_granules")
+@mock.patch("georest.connect_to_gs_catalog")
+def test_add_file_to_mosaic_existing_file(connect_to_gs_catalog, file_in_granules):
+    """Test adding an exisgint file to image mosaic."""
+    from georest import add_file_to_mosaic
+
+    config = deepcopy(ADD_FILE_TO_MOSAIC_CONFIG)
+
+    add_granule = mock.MagicMock()
+    cat = mock.MagicMock(add_granule=add_granule)
+    connect_to_gs_catalog.return_value = cat
+
+    fname_in = "/path/to/europe_airmass.tif"
+
+    # The file is already added, should not re-add it
+    file_in_granules.return_value = True
+    add_file_to_mosaic(config, fname_in)
+    add_granule.assert_not_called()
+
+
+@mock.patch("georest.connect_to_gs_catalog")
+def test_add_file_to_mosaic_failed_request(connect_to_gs_catalog):
+    """Test that a failed file addition is handled."""
+    from geoserver.catalog import FailedRequestError
+
+    from georest import add_file_to_mosaic
+
+    config = deepcopy(ADD_FILE_TO_MOSAIC_CONFIG)
+
+    add_granule = mock.MagicMock()
+    cat = mock.MagicMock(add_granule=add_granule)
+    connect_to_gs_catalog.return_value = cat
+
+    fname_in = "/path/to/europe_airmass.tif"
+
     # Check that failed request is handled
     add_granule.side_effect = FailedRequestError
     add_file_to_mosaic(config, fname_in)
+
+
+@mock.patch("georest.requests")
+@mock.patch("georest.utils.file_in_granules")
+@mock.patch("georest.connect_to_gs_catalog")
+def test_add_file_to_mosaic_s3(connect_to_gs_catalog, file_in_granules, requests):
+    """Test adding a file to image mosaic when data are in S3 object storage."""
+    from georest import add_file_to_mosaic
+
+    config = deepcopy(ADD_FILE_TO_MOSAIC_CONFIG)
+
+    # Returns False if the file isn't in database
+    file_in_granules.return_value = False
+    add_granule = mock.MagicMock()
+    cat = mock.MagicMock(add_granule=add_granule)
+    connect_to_gs_catalog.return_value = cat
+
+    fname_in = "https://bucket.host/europe_airmass.tif"
+
+    add_file_to_mosaic(config, fname_in, filesystem='s3')
+
+    call = requests.mock_calls[0]
+    assert call.args[0] == "http://host/workspaces/satellite/coveragestores/airmass_store/remote.imagemosaic"
+    expected = {'data': '/mnt/data/europe_airmass.tif',
+                'headers': {'Content-type': 'text/plain'},
+                'auth': ('user', 'passwd')}
+    assert call.kwargs == expected
 
 
 @mock.patch("georest.connect_to_gs_catalog")
