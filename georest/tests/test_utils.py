@@ -37,9 +37,10 @@ def test_read_config():
 
 def test_read_config_credentials_in_env():
     """Test reading a config file when user/passwd are given in environment variables."""
-    from georest.utils import read_config
-    import tempfile
     import os
+    import tempfile
+
+    from georest.utils import read_config
 
     os.environ["GEOSERVER_USER"] = "user1"
     os.environ["GEOSERVER_PASSWORD"] = "passwd1"
@@ -58,9 +59,10 @@ def test_read_config_credentials_in_env():
 
 def test_read_config_default_credentials():
     """Test reading a config file when user/passwd are not given."""
-    from georest.utils import read_config
-    import tempfile
     import os
+    import tempfile
+
+    from georest.utils import read_config
 
     os.environ.pop("GEOSERVER_USER", None)
     os.environ.pop("GEOSERVER_PASSWORD", None)
@@ -284,3 +286,40 @@ def test_posttroll_adder_loop_subscribe_config_options(connect_to_gs_catalog, pr
     assert mock.call('nameserver', 'localhost') in config.get.mock_calls
     assert mock.call('addresses') in config.get.mock_calls
     assert mock.call('use_address_listener', True) in config.get.mock_calls
+
+
+@mock.patch("georest.utils.file_in_granules")
+@mock.patch("georest.utils.convert_file_path")
+@mock.patch("georest.add_s3_granule")
+@mock.patch("georest.connect_to_gs_catalog")
+def test_run_posttroll_adder_s3(connect_to_gs_catalog, add_s3_granule,
+                                convert_file_path, file_in_granules):
+    """Test running posttroll adder."""
+    from georest.utils import run_posttroll_adder
+
+    # No "airmass" layer configured
+    config = {"workspace": "satellite",
+              "topics": ["/topic1", "/topic2"],
+              "layers": {"airmass": "airmass_layer_name"},
+              "filesystem": "s3",
+              "host": "hostname",
+              }
+    convert_file_path.return_value = "/mnt/data/image.tif"
+    msg = mock.MagicMock(data={"productname": "airmass", "uri": "/path/to/image.tif"})
+    Subscribe = mock.MagicMock()
+    Subscribe.return_value.__enter__.return_value.recv.return_value = [None, msg]
+    file_in_granules.return_value = False
+
+    run_posttroll_adder(config, Subscribe)
+    add_s3_granule.assert_called_once()
+    # The store is added to the config
+    config["store"] = config["layers"]["airmass"]
+    expected_meta = {
+        'host': 'hostname',
+        'workspace': 'satellite',
+        'layer_name': 'airmass_layer_name',
+        'image_url': '/mnt/data/image.tif'}
+    add_s3_granule.assert_called_once_with(
+        config,
+        expected_meta
+    )

@@ -278,7 +278,7 @@ def _process_message(cat, config, msg):
             'host': config['host'],
             'workspace': workspace,
             'layer_name': store,
-            'prototype_image': fname,
+            'image_url': fname,
         }
         georest.add_s3_granule(config, meta)
     else:

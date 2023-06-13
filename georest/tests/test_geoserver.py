@@ -407,7 +407,7 @@ def test_create_s3_layers(requests):
             {
                 "product_name": "product_name",
                 "product_title": "product_title",
-                "prototype_image": "https://bucket.host/image.tif",
+                "image_url": "https://bucket.host/image.tif",
                 "abstract": "abstract",
             }
         ]
@@ -428,10 +428,11 @@ def test_create_s3_layers(requests):
                 'headers': {'Content-type': 'text/plain'},
                 'auth': ('user', 'passwd')}
     assert second_call.kwargs == expected
-    third_call = requests.mock_calls[2]
+    # The next two calls are checking the request status, skip those
+    last_call = requests.mock_calls[-1]
     url = 'http://host/workspaces/workspace/coveragestores/layer_pattern/coverages'
-    assert third_call.args[0] == url
+    assert last_call.args[0] == url
     expected = {'data': 'coverage_template',
                 'headers': {'Content-type': 'text/xml'},
                 'auth': ('user', 'passwd')}
-    assert third_call.kwargs == expected
+    assert last_call.kwargs == expected

@@ -44,16 +44,16 @@ layers:
   - product_name: airmass
     product_title: Airmass
     # The prototype image should be available in a bucket
-    prototype_image: https://<bucket>.<bucket host>/20170920_0000_MTGI-1_EPSG3035_airmass.tif
+    image_url: https://<bucket>.<bucket host>/20170920_0000_MTGI-1_EPSG3035_airmass.tif
     # The optional abstract text can be inline, or available in a file
     abstract: /path/to/abstracts/abstract_airmass.txt
   - product_name: night_microphysical
     product_title: Night microphysical, night-side only
-    prototype_image: https://<bucket>.<bucket host>/20170920_0000_MTGI-1_EPSG3035_night_microphysical.tif
+    image_url: https://<bucket>.<bucket host>/20170920_0000_MTGI-1_EPSG3035_night_microphysical.tif
     abstract: /path/to/abstracts/abstract_airmass.txt
   - product_name: true_color
     product_title: True color, day-side only
-    prototype_image: https://<bucket>.<bucket host>/20170920_0000_MTGI-1_EPSG3035_true_color.tif
+    image_url: https://<bucket>.<bucket host>/20170920_0000_MTGI-1_EPSG3035_true_color.tif
     abstract: /path/to/abstracts/abstract_airmass.txt
 
 log_config:
