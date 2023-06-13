@@ -230,7 +230,7 @@ def add_s3_granule(config, meta):
     auth = (config['user'], config['passwd'])
     req = requests.post(url, data=data, headers=headers, auth=auth)
     if req.status_code == requests.codes.ok:
-        logger.info(f"Granule '{data} added to '{meta['workspace']}:{meta['layer_name']}'")
+        logger.info(f"Granule '{data}' added to '{meta['workspace']}:{meta['layer_name']}'")
     else:
         logger.error(f"Adding granule '{data}' failed with status code {req.status_code}")
 
