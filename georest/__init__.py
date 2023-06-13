@@ -232,7 +232,7 @@ def add_s3_granule(config, meta):
     if req.status_code == requests.codes.ok:
         logger.info(f"Granule '{data} added to '{meta['workspace']}:{meta['layer_name']}'")
     else:
-        logger.error("Adding granule '{data}' failed with status code {req.status_code}")
+        logger.error(f"Adding granule '{data}' failed with status code {req.status_code}")
 
 
 def _configure_coverage(config, meta):
