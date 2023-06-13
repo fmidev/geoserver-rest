@@ -210,7 +210,7 @@ def _create_s3_layers(config, property_file, meta):
     if requests is None:
         raise ImportError("'requests' is needed for S3 layer creation.")
     _send_properties(config, property_file, meta)
-    _add_prototype_granule(config, meta)
+    add_s3_granule(config, meta)
     _configure_coverage(config, meta)
 
 
@@ -222,12 +222,17 @@ def _send_properties(config, property_file, meta):
         _ = requests.put(url, data=data, headers=headers, auth=auth)
 
 
-def _add_prototype_granule(config, meta):
+def add_s3_granule(config, meta):
+    """Add a file in S3 bucket to image mosaic."""
     url = trollsift.compose(S3_GRANULE_URL, meta)
-    data = meta['prototype_image']
+    data = meta['image_url']
     headers = {'Content-type': 'text/plain'}
     auth = (config['user'], config['passwd'])
-    _ = requests.post(url, data=data, headers=headers, auth=auth)
+    req = requests.post(url, data=data, headers=headers, auth=auth)
+    if req.status_code == requests.codes.ok:
+        logger.info(f"Granule '{data} added to '{meta['workspace']}:{meta['layer_name']}'")
+    else:
+        logger.error("Adding granule '{data}' failed with status code {req.status_code}")
 
 
 def _configure_coverage(config, meta):
@@ -302,7 +307,7 @@ def add_file_to_mosaic(config, fname_in, filesystem='posix'):
             'host': config['host'],
             'workspace': workspace,
             'layer_name': store,
-            'prototype_image': fname,
+            'image_url': fname,
         }
         add_s3_granule(config, meta)
     else:
@@ -324,11 +329,6 @@ def add_granule(cat, workspace, store, file_path):
                     os.path.basename(file_path), workspace, store)
     except (FailedRequestError, ConnectionRefusedError) as err:
         logger.error("Adding granule '%s' failed: %s", file_path, str(err))
-
-
-def add_s3_granule(config, meta):
-    """Add a file in S3 bucket to image mosaic."""
-    _add_prototype_granule(config, meta)
 
 
 def _get_store_name_from_filename(config, fname):
