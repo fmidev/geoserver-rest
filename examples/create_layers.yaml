@@ -39,6 +39,13 @@ common_items:
   # Uncomment to set cache age setting (in seconds) for HTTP header responses
   # cache_age_max: 86400
 
+default_style:
+  null
+  # Name of style
+  # name: raster
+  # # Workspace of the style
+  # workspace: Radar
+
 # Property files to be sent.
 properties:
   indexer.properties:
@@ -54,17 +61,29 @@ properties:
   files:
     - /tmp/20200402_1135_empty_EPSG3035.tif
 
-# Settings for the layer time dimension
-time_dimension:
-  # Needs to match with properties -> indexer -> TimeAttribute
-  name: *time_attribute
-  enabled: true
-  # Images are available regularly every 5 minutes
-  presentation: DISCRETE_INTERVAL
-  # Time resolution in milliseconds.  300000 = 5 minutes
-  resolution: 300000
-  units: ISO8601
-  nearestMatchEnabled: false
+dimensions:
+  # Settings for the layer time dimension
+  time_dimension:
+    # Needs to match with properties -> indexer -> TimeAttribute
+    name: *time_attribute
+    enabled: true
+    # Images are available regularly every 5 minutes
+    presentation: DISCRETE_INTERVAL
+    # Time resolution in milliseconds.  300000 = 5 minutes
+    resolution: 300000
+    units: ISO8601
+    nearestMatchEnabled: false
+  elevation_dimension:
+    # Needs to match with properties -> indexer -> ElevationAttribute
+    name: elevation
+    enabled: true
+    # Presentation in GetCapabilities
+    presentation: LIST
+    units: "Degree"
+    # Set default value strategy
+    strategy: "MINIMUM"
+    # Set default unit symbol
+    unitSymbol: "°"
 
 # List of the mosaics to be created.
 # Layers will not be overwritten, but the metadata will be updated
