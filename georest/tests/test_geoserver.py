@@ -83,22 +83,25 @@ def _create_extra_files(tempdir, files):
     return out_files
 
 
-CREATE_LAYERS_CONFIG = {"host": "host",
-                        "workspace": "workspace",
-                        "common_items": {"cache_age_max": 86400},
-                        "properties": {"foo": {"bar": "baz"}},
-                        "time_dimension": {"name": "name",
-                                           "enabled": "enabled",
-                                           "presentation": "presentation",
-                                           "resolution": "resolution",
-                                           "units": "units",
-                                           "nearestMatchEnabled": "nearestMatchEnabled"},
-                        "layers": [{"name": "colorized_ir_clouds",
-                                    "title": "Title text",
-                                    "abstract": "Abstract",
-                                    "keywords": ["kw1", "kw2"]},
-                                   ]
-                        }
+CREATE_LAYERS_CONFIG = {
+    "host": "host",
+    "workspace": "workspace",
+    "common_items": {"cache_age_max": 86400},
+    "properties": {"foo": {"bar": "baz"}},
+    "dimensions": {
+        "time_dimension": {
+            "name": "name",
+            "enabled": "enabled",
+            "presentation": "presentation",
+            "resolution": "resolution",
+            "units": "units",
+            "nearestMatchEnabled": "nearestMatchEnabled",
+        },
+    },
+    "layers": [
+        {"name": "colorized_ir_clouds", "title": "Title text", "abstract": "Abstract", "keywords": ["kw1", "kw2"]},
+    ],
+}
 
 
 @mock.patch("georest.DimensionInfo")
