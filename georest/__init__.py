@@ -99,14 +99,14 @@ def _create_layers(config, cat, property_file):
         utils.write_wkt_for_files(config, layer_directories[layer_name])
 
         if _create_layer(cat, workspace, layer_name, property_file):
-            if not add_layer_metadata(cat, workspace, layer_name, time_dim, meta):
+            if not add_layer_metadata(cat, workspace, layer_name, dimensions, meta, style=config.get("default_style")):
                 continue
             # Delete the empty image from database (does not remove the file)
             for fname in config["properties"].get("files", []):
                 delete_granule(cat, workspace, layer_name, fname)
 
 
-def add_layer_metadata(cat, workspace, layer_name, time_dim, meta):
+def add_layer_metadata(cat, workspace, layer_name, dimensions, meta, style=None):
     """Add metadata for the given layer."""
     coverage = cat.get_resource(workspace=workspace, store=layer_name)
     if coverage is None:
@@ -131,9 +131,7 @@ def add_layer_metadata(cat, workspace, layer_name, time_dim, meta):
     if style is not None:
         # Add default style for layer
         layer = cat.get_layer(layer_name)
-        layer._set_default_style(
-            cat.get_style(style["name"], workspace=style["workspace"])
-        )
+        layer._set_default_style(cat.get_style(style["name"], workspace=style["workspace"]))
         cat.save(layer)
     logger.info(
         "Metadata written for layer '%s' on workspace '%s'", layer_name, workspace
