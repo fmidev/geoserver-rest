@@ -175,24 +175,6 @@ def create_layer(cat, workspace, layer, property_file):
     logger.info("Layer '%s' created to workspace '%s'", layer, workspace)
 
 
-def _add_time_dimension(coverage, time_dim):
-    """Add time dimension for the layer."""
-    metadata = coverage.metadata.copy()
-    time_info = DimensionInfo(
-        time_dim["name"],
-        time_dim["enabled"],
-        time_dim["presentation"],
-        time_dim["resolution"],
-        time_dim["units"],
-        None,
-        nearestMatchEnabled=time_dim["nearestMatchEnabled"],
-    )
-    metadata["time"] = time_info
-    coverage.metadata = metadata
-
-    return coverage
-
-
 def add_dimension(coverage, dim):
     """Add dimension for the layer."""
     metadata = coverage.metadata.copy()
