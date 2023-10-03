@@ -76,7 +76,7 @@ def _collect_layer_metadata(config, layer_config):
 def _create_layers(config, cat, property_file):
     """Create all configured layers."""
     workspace = config["workspace"]
-    time_dim = config["time_dimension"]
+    dimensions = config["dimensions"]
 
     # Make sure the workspace exists
     create_workspace(workspace, cat)
@@ -99,14 +99,14 @@ def _create_layers(config, cat, property_file):
         utils.write_wkt_for_files(config, layer_directories[layer_name])
 
         if _create_layer(cat, workspace, layer_name, property_file):
-            if not add_layer_metadata(cat, workspace, layer_name, time_dim, meta):
+            if not add_layer_metadata(cat, workspace, layer_name, dimensions, meta, style=config.get("default_style")):
                 continue
             # Delete the empty image from database (does not remove the file)
             for fname in config["properties"].get("files", []):
                 delete_granule(cat, workspace, layer_name, fname)
 
 
-def add_layer_metadata(cat, workspace, layer_name, time_dim, meta):
+def add_layer_metadata(cat, workspace, layer_name, dimensions, meta, style=None):
     """Add metadata for the given layer."""
     coverage = cat.get_resource(workspace=workspace, store=layer_name)
     if coverage is None:
@@ -120,13 +120,22 @@ def add_layer_metadata(cat, workspace, layer_name, time_dim, meta):
                 attr = trollsift.compose(attr, meta)
             setattr(coverage, attribute, attr)
 
-    coverage = _add_time_dimension(coverage, time_dim)
-    coverage = _add_cache_age_max(coverage, meta.get("cache_age_max", None))
+    # Add dimensions
+    for _, dim in dimensions.items():
+        coverage = add_dimension(coverage, dim)
 
+    coverage = _add_cache_age_max(coverage, meta.get("cache_age_max", None))
     # Save the added metadata
     cat.save(coverage)
-    logger.info("Metadata written for layer '%s' on workspace '%s'",
-                layer_name, workspace)
+
+    if style is not None:
+        # Add default style for layer
+        layer = cat.get_layer(layer_name)
+        layer._set_default_style(cat.get_style(style["name"], workspace=style["workspace"]))
+        cat.save(layer)
+    logger.info(
+        "Metadata written for layer '%s' on workspace '%s'", layer_name, workspace
+    )
     return True
 
 
@@ -166,18 +175,20 @@ def create_layer(cat, workspace, layer, property_file):
     logger.info("Layer '%s' created to workspace '%s'", layer, workspace)
 
 
-def _add_time_dimension(coverage, time_dim):
-    """Add time dimension for the layer."""
+def add_dimension(coverage, dim):
+    """Add dimension for the layer."""
     metadata = coverage.metadata.copy()
-    time_info = DimensionInfo(
-        time_dim["name"],
-        time_dim["enabled"],
-        time_dim["presentation"],
-        time_dim["resolution"],
-        time_dim["units"],
-        None,
-        nearestMatchEnabled=time_dim["nearestMatchEnabled"])
-    metadata['time'] = time_info
+    dim_info = DimensionInfo(
+        dim["name"],
+        dim["enabled"],
+        dim["presentation"],
+        resolution=dim.get("resolution"),
+        units=dim.get("units"),
+        unitSymbol=dim.get("unitSymbol"),
+        strategy=dim.get("strategy"),
+        nearestMatchEnabled=dim.get("nearestMatchEnabled"),
+    )
+    metadata[dim["name"]] = dim_info
     coverage.metadata = metadata
 
     return coverage

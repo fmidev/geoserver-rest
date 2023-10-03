@@ -83,22 +83,28 @@ def _create_extra_files(tempdir, files):
     return out_files
 
 
-CREATE_LAYERS_CONFIG = {"host": "host",
-                        "workspace": "workspace",
-                        "common_items": {"cache_age_max": 86400},
-                        "properties": {"foo": {"bar": "baz"}},
-                        "time_dimension": {"name": "name",
-                                           "enabled": "enabled",
-                                           "presentation": "presentation",
-                                           "resolution": "resolution",
-                                           "units": "units",
-                                           "nearestMatchEnabled": "nearestMatchEnabled"},
-                        "layers": [{"name": "colorized_ir_clouds",
-                                    "title": "Title text",
-                                    "abstract": "Abstract",
-                                    "keywords": ["kw1", "kw2"]},
-                                   ]
-                        }
+CREATE_LAYERS_CONFIG = {
+    "host": "host",
+    "workspace": "workspace",
+    "common_items": {"cache_age_max": 86400},
+    "properties": {"foo": {"bar": "baz"}},
+    "dimensions": {
+        "time_dimension": {
+            "name": "name",
+            "enabled": "enabled",
+            "presentation": "presentation",
+            "resolution": "resolution",
+            "units": "units",
+            "nearestMatchEnabled": "nearestMatchEnabled",
+        },
+    },
+    "layers": [
+        {"name": "colorized_ir_clouds", "title": "Title text", "abstract": "Abstract", "keywords": ["kw1", "kw2"]},
+    ],
+}
+
+CREATE_LAYERS_WITH_STYLE_CONFIG = deepcopy(CREATE_LAYERS_CONFIG)
+CREATE_LAYERS_WITH_STYLE_CONFIG["default_style"] = {"name": "style", "workspace": "workspace"}
 
 
 @mock.patch("georest.DimensionInfo")
@@ -159,6 +165,28 @@ def test_create_layers_already_exist(connect_to_gs_catalog, DimensionInfo):
     cat.get_resource.assert_called_with(store="europe_layer2_name",
                                         workspace=config["workspace"])
     assert cat.save.call_count == 2
+
+
+@mock.patch("georest.connect_to_gs_catalog")
+def test_create_layers_with_style(connect_to_gs_catalog):
+    """Test creating layers when they already exist."""
+    import tempfile
+
+    from georest import create_layers
+
+    config = deepcopy(CREATE_LAYERS_WITH_STYLE_CONFIG)
+    cat = mock.MagicMock()
+    coverage = mock.MagicMock()
+    cat.get_resource.return_value = coverage
+
+    connect_to_gs_catalog.return_value = cat
+
+    with tempfile.TemporaryDirectory() as tempdir:
+        config["exposed_base_dir"] = tempdir
+        create_layers(config.copy())
+
+    assert "call.get_style('style', workspace='workspace')" in str(cat.mock_calls)
+    assert "_set_default_style" in str(cat.mock_calls)
 
 
 @mock.patch("georest.delete_granule")
