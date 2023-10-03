@@ -85,9 +85,12 @@ def _write_property_zip(prop_paths, zip_path):
     return zip_path
 
 
-def convert_file_path(config, file_path, inverse=False):
+def convert_file_path(config, file_path, inverse=False, keep_subpath=False):
     """Convert given file path to internal directory structure."""
-    basename = os.path.basename(file_path)
+    if not keep_subpath:
+        basename = os.path.basename(file_path)
+    else:
+        basename = file_path
     if inverse:
         new_dir = config["exposed_base_dir"]
     else:
