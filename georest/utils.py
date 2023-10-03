@@ -96,7 +96,10 @@ def convert_file_path(config, file_path, inverse=False, keep_subpath=False):
     else:
         new_dir = config["geoserver_target_dir"]
 
-    path = os.path.join(new_dir, basename)
+    if keep_subpath and inverse:
+        path = basename.replace(config["geoserver_target_dir"], config["exposed_base_dir"])
+    else:
+        path = os.path.join(new_dir, basename)
 
     return path
 

@@ -359,7 +359,8 @@ def test_convert_file_path_keep_subpath_inverse():
     """Test the file path conversion when keeping the subpath of the file for the inverse case."""
     from georest.utils import convert_file_path
 
-    config = {"exposed_base_dir": "/external/path/"}
+    config = {"exposed_base_dir": "/external/path/",
+              "geoserver_target_dir": "/geoserver/internal/path/"}
     res = convert_file_path(config, "/geoserver/internal/path/subpath/file.tif", inverse=True, keep_subpath=True)
 
     assert res == "/external/path/subpath/file.tif"
