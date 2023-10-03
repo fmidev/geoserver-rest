@@ -39,6 +39,7 @@ common_items:
   # Uncomment to set cache age setting (in seconds) for HTTP header responses
   # cache_age_max: 86400
 
+# Set the default style to the layer. The style should already exist
 default_style:
   null
   # Name of style
