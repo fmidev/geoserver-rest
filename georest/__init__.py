@@ -286,7 +286,7 @@ def add_file_to_mosaic(config, fname_in, filesystem='posix'):
     This function wraps some boilerplate around adding a granule to a layer.
 
     """
-    fname = utils.convert_file_path(config, fname_in, keep_subpath=config["keep_subpath"])
+    fname = utils.convert_file_path(config, fname_in, keep_subpath=config.get("keep_subpath", False))
     identity_check_seconds = config.get("identity_check_seconds")
 
     store = _get_store_name_from_filename(config, fname)
@@ -404,7 +404,7 @@ def _delete_files_from_fs(config, gs_location):
     delete_files = config.get("delete_files", False)
     if not delete_files:
         return
-    fs_path = utils.convert_file_path(config, gs_location, inverse=True, keep_subpath=config["keep_subpath"])
+    fs_path = utils.convert_file_path(config, gs_location, inverse=True, keep_subpath=config.get("keep_subpath", False))
     _delete_file_from_fs(config, fs_path)
     _delete_file_from_fs(config, fs_path, replace_extension="prj")
 
