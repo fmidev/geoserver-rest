@@ -246,10 +246,11 @@ ADD_FILE_TO_MOSAIC_CONFIG = {
     "passwd": "passwd",
     "workspace": "satellite",
     "geoserver_target_dir": "/mnt/data",
+    "keep_subpath": False,
     "file_pattern": "{area}_{productname}.tif",
     "layer_id": "productname",
     "layers": {"airmass": "airmass_store"},
-    }
+}
 
 
 @mock.patch("georest.utils.file_in_granules")
