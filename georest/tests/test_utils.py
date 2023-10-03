@@ -323,3 +323,43 @@ def test_run_posttroll_adder_s3(connect_to_gs_catalog, add_s3_granule,
         config,
         expected_meta
     )
+
+
+def test_convert_file_path():
+    """Test the file path conversion for the default case."""
+    from georest.utils import convert_file_path
+
+    config = {"geoserver_target_dir": "/geoserver/internal/path/"}
+    res = convert_file_path(config, "/external/path/file.tif")
+
+    assert res == "/geoserver/internal/path/file.tif"
+
+
+def test_convert_file_path_inverse():
+    """Test the file path conversion for the inverse case."""
+    from georest.utils import convert_file_path
+
+    config = {"exposed_base_dir": "/external/path/"}
+    res = convert_file_path(config, "/geoserver/internal/path/file.tif", inverse=True)
+
+    assert res == "/external/path/file.tif"
+
+
+def test_convert_file_path_keep_subpath():
+    """Test the file path conversion when keeping the subpath of the file."""
+    from georest.utils import convert_file_path
+
+    config = {"geoserver_target_dir": "/geoserver/internal/path/"}
+    res = convert_file_path(config, "subpath/file.tif", keep_subpath=True)
+
+    assert res == "/geoserver/internal/path/subpath/file.tif"
+
+
+def test_convert_file_path_keep_subpath_inverse():
+    """Test the file path conversion when keeping the subpath of the file for the inverse case."""
+    from georest.utils import convert_file_path
+
+    config = {"exposed_base_dir": "/external/path/"}
+    res = convert_file_path(config, "/geoserver/internal/path/subpath/file.tif", inverse=True, keep_subpath=True)
+
+    assert res == "/external/path/subpath/file.tif"
