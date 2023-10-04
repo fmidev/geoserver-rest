@@ -85,15 +85,21 @@ def _write_property_zip(prop_paths, zip_path):
     return zip_path
 
 
-def convert_file_path(config, file_path, inverse=False):
+def convert_file_path(config, file_path, inverse=False, keep_subpath=False):
     """Convert given file path to internal directory structure."""
-    basename = os.path.basename(file_path)
+    if not keep_subpath:
+        basename = os.path.basename(file_path)
+    else:
+        basename = file_path
     if inverse:
         new_dir = config["exposed_base_dir"]
     else:
         new_dir = config["geoserver_target_dir"]
 
-    path = os.path.join(new_dir, basename)
+    if keep_subpath and inverse:
+        path = basename.replace(config["geoserver_target_dir"], config["exposed_base_dir"])
+    else:
+        path = os.path.join(new_dir, basename)
 
     return path
 

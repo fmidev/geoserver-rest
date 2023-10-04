@@ -9,6 +9,9 @@ store: <name of the layer>
 
 # Internal path to directory within Geoserver where images are placed
 geoserver_target_dir: /mnt/images/this/layers/own/directory
+# Whether to keep the subpath given with the filename in program arguments
+# This should be true if the images are placed in subdirectories of the target directory
+keep_subpath: false
 # For S3, use the https address of the bucket:
 # geoserver_target_dir: https://<bucket name>.<host address>
 
@@ -49,12 +52,11 @@ layers:
   airmass: satellite_geo_europe_seviri-15min_airmass
   ash: satellite_geo_europe_seviri-15min_ash
 
-
 log_config:
   version: 1
   formatters:
     fmt:
-      format: '[%(asctime)s %(levelname)-8s %(name)s] %(message)s'
+      format: "[%(asctime)s %(levelname)-8s %(name)s] %(message)s"
   handlers:
     console:
       class: logging.StreamHandler
@@ -70,15 +72,15 @@ log_config:
       interval: 1
       backupCount: 10
   loggers:
-    '':
+    "":
       level: DEBUG
       handlers: [console, file]
       propagate: false
-    'georest':
+    "georest":
       level: DEBUG
       handlers: [console, file]
       propagate: false
-    'georest.utils':
+    "georest.utils":
       level: DEBUG
       handlers: [console, file]
       propagate: false
