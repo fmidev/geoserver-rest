@@ -104,7 +104,10 @@ CREATE_LAYERS_CONFIG = {
 }
 
 CREATE_LAYERS_WITH_STYLE_CONFIG = deepcopy(CREATE_LAYERS_CONFIG)
-CREATE_LAYERS_WITH_STYLE_CONFIG["default_style"] = {"name": "style", "workspace": "workspace"}
+CREATE_LAYERS_WITH_STYLE_CONFIG["style"] = {
+    "default_style": {"name": "style", "workspace": "workspace"},
+    "additional_styles": [{"name": "additional_style1", "workspace": "workspace"}, {"name": "additional_style2", "workspace": "workspace"}],
+}
 
 
 @mock.patch("georest.DimensionInfo")
@@ -186,7 +189,10 @@ def test_create_layers_with_style(connect_to_gs_catalog):
         create_layers(config.copy())
 
     assert "call.get_style('style', workspace='workspace')" in str(cat.mock_calls)
+    assert "call.get_style('additional_style1', workspace='workspace')" in str(cat.mock_calls)
+    assert "call.get_style('additional_style1', workspace='workspace')" in str(cat.mock_calls)
     assert "_set_default_style" in str(cat.mock_calls)
+    assert "_set_alternate_styles" in str(cat.mock_calls)
 
 
 @mock.patch("georest.delete_granule")
