@@ -190,7 +190,7 @@ def test_create_layers_with_style(connect_to_gs_catalog):
 
     assert "call.get_style('style', workspace='workspace')" in str(cat.mock_calls)
     assert "call.get_style('additional_style1', workspace='workspace')" in str(cat.mock_calls)
-    assert "call.get_style('additional_style1', workspace='workspace')" in str(cat.mock_calls)
+    assert "call.get_style('additional_style2', workspace='workspace')" in str(cat.mock_calls)
     assert "_set_default_style" in str(cat.mock_calls)
     assert "_set_alternate_styles" in str(cat.mock_calls)
 
