@@ -39,13 +39,18 @@ common_items:
   # Uncomment to set cache age setting (in seconds) for HTTP header responses
   # cache_age_max: 86400
 
-# Set the default style to the layer. The style should already exist
-default_style:
+# Set the default and additional styles to the layer. The styles should already exist
+style:
   null
-  # Name of style
-  # name: raster
-  # # Workspace of the style
-  # workspace: Radar
+  # default_style:
+  #   # Name of style
+  #   # name: raster
+  #   # # Workspace of the style
+  #   # workspace: null
+  # additional_styles:  # at least name must be given
+  #   # - name: "raster"
+  #   #   workspace: null
+  #   # - name: "Radar dbz winter"
 
 # Property files to be sent.
 properties:
