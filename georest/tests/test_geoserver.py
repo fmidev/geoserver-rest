@@ -137,7 +137,7 @@ def test_create_layers(connect_to_gs_catalog, DimensionInfo):
     cat.save.assert_called_once()
     assert "'cacheAgeMax', '86400'" in str(coverage.mock_calls)
     assert "'cachingEnabled', 'true'" in str(coverage.mock_calls)
-    assert "'ProjectionPolicy', 'FORCE_DECLARED'" in str(coverage.mock_calls)
+    assert "'projectionPolicy', 'FORCE_DECLARED'" in str(coverage.mock_calls)
 
 
 @mock.patch("georest.DimensionInfo")

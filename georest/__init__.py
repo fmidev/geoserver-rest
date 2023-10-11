@@ -226,8 +226,8 @@ def _add_projection_policy(coverage, projection_policy):
     # ugly hack to fix a (possible) bug in geoserver-restconfig
     # differences in names for projection_policy/ProjectionPolicy
     # make it so that the projection_policy is not written in the message
-    coverage.dirty["ProjectionPolicy"] = projection_policy
-    coverage.writers["ProjectionPolicy"] = write_string("projectionPolicy")
+    coverage.dirty["projectionPolicy"] = projection_policy
+    coverage.writers["projectionPolicy"] = write_string("projectionPolicy")
 
     return coverage
 
