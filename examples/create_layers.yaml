@@ -38,6 +38,8 @@ common_items:
   title_pattern: "Satellite {orbit_title} {area_title} {sensor_title} {product_title}"
   # Uncomment to set cache age setting (in seconds) for HTTP header responses
   # cache_age_max: 86400
+  # Set projection policy for the layer
+  projection_policy: FORCE_DECLARED
 
 # Set the default and additional styles to the layer. The styles should already exist
 style:
