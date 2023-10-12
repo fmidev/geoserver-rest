@@ -86,7 +86,7 @@ def _create_extra_files(tempdir, files):
 CREATE_LAYERS_CONFIG = {
     "host": "host",
     "workspace": "workspace",
-    "common_items": {"cache_age_max": 86400},
+    "common_items": {"cache_age_max": 86400, "projection_policy": "FORCE_DECLARED"},
     "properties": {"foo": {"bar": "baz"}},
     "dimensions": {
         "time_dimension": {
@@ -137,6 +137,7 @@ def test_create_layers(connect_to_gs_catalog, DimensionInfo):
     cat.save.assert_called_once()
     assert "'cacheAgeMax', '86400'" in str(coverage.mock_calls)
     assert "'cachingEnabled', 'true'" in str(coverage.mock_calls)
+    assert "'projectionPolicy', 'FORCE_DECLARED'" in str(coverage.mock_calls)
 
 
 @mock.patch("georest.DimensionInfo")
