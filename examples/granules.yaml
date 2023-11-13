@@ -31,6 +31,9 @@ file_pattern: "{start_time:%Y%m%d_%H%M}_{platform_name}_{areaname}_{productname}
 
 # The filename part to use for layer identification
 layer_id: productname
+# OR use a template for the layer name with items from file_pattern
+# if layer_id given, this is ignored
+# layer_name_template: optclass_{radar_name}
 
 # For delete_old_granules_and_files.py
 #    Maximum age for granules, in minutes

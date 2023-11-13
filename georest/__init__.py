@@ -372,8 +372,15 @@ def _get_store_name_from_filename(config, fname):
     """Parse store name from filename."""
     file_pattern = config["file_pattern"]
     file_parts = trollsift.parse(file_pattern, os.path.basename(fname))
-    layer_id = file_parts[config["layer_id"]]
-    return config["layers"][layer_id]
+
+    if "layer_id" in config:
+        layer_id = file_parts[config["layer_id"]]
+        return config["layers"][layer_id]
+    elif "layer_name_template" in config:
+        layer_name = trollsift.compose(config["layer_name_template"], file_parts)
+        return layer_name
+    else:
+        raise ValueError("Either 'layer_id' or 'layer_name_template' must be defined in config")
 
 
 def delete_file_from_mosaic(config, fname):
