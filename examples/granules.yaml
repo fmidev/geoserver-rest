@@ -55,6 +55,24 @@ layers:
   airmass: satellite_geo_europe_seviri-15min_airmass
   ash: satellite_geo_europe_seviri-15min_ash
 
+# Layer options for delete granule layers when using layer_name_template instead of layer_id
+# delete_granule_layer_options:
+#   radar:
+#     [
+#       fivim,
+#       fikan,
+#       fikes,
+#       fikor,
+#       fikuo,
+#       filuo,
+#       finur,
+#       fipet,
+#       fiuta,
+#       fianj,
+#       fivih,
+#     ]
+#   quantity: [dbzh, vrad]
+
 log_config:
   version: 1
   formatters:
