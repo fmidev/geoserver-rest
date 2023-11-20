@@ -487,8 +487,11 @@ def test_delete_file_from_mosaic_layertemplate(connect_to_gs_catalog):
     coverages = {
         "coverages": {
             "coverage": [
-                {"name": "airmass_europe"},
-            ]
+                {"name": "airmass1_europe"},
+                {"name": "airmass2_europe"},
+                {"name": "airmass1_global"},
+                {"name": "airmass2_global"},
+            ],
         }
     }
     cat = mock.MagicMock()
@@ -500,22 +503,27 @@ def test_delete_file_from_mosaic_layertemplate(connect_to_gs_catalog):
         "geoserver_target_dir": "/mnt/data",
         "file_pattern": "{area}_{productname}.tif",
         "layer_name_template": "{productname}_{area}",
-        "delete_granule_layer_options": {"area": ["europe"], "productname": ["airmass"]},
+        "delete_granule_layer_options": {"area": ["europe", "global"], "productname": ["airmass1", "airmass2"]},
     }
-    fname = "europe_airmass.tif"
+    fnames = ["europe_airmass1.tif", "global_airmass1.tif", "europe_airmass2.tif", "global_airmass2.tif"]
 
-    delete_file_from_mosaic(config, fname)
+    for fname in fnames:
+        delete_file_from_mosaic(config, fname)
 
     connect_to_gs_catalog.assert_called_with(config)
-    cat.get_store.assert_called_with("airmass_europe", "satellite")
+    assert cat.get_store.call_count == len(fnames)
+    assert "call('airmass1_europe', 'satellite')" in str(cat.get_store.call_args_list)
+    assert "call('airmass2_europe', 'satellite')" in str(cat.get_store.call_args_list)
+    assert "call('airmass1_global', 'satellite')" in str(cat.get_store.call_args_list)
+    assert "call('airmass1_global', 'satellite')" in str(cat.get_store.call_args_list)
     cat.list_granules.assert_called()
     cat.delete_granule.assert_not_called()
 
     # This is the structure returned by cat.list_granules()
-    granules = {"features": [{"properties": {"location": "/mnt/data/europe_airmass.tif"}, "id": "file-id"}]}
+    granules = {"features": [{"properties": {"location": "/mnt/data/europe_airmass1.tif"}, "id": "file-id"}]}
     cat.list_granules.return_value = granules
 
-    delete_file_from_mosaic(config, fname)
+    delete_file_from_mosaic(config, fnames[0])
     cat.delete_granule.assert_called()
 
 
