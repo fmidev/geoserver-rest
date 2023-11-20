@@ -8,7 +8,7 @@
 """Unittests for Geoserver REST methods."""
 
 from copy import deepcopy
-from unittest import mock
+from unittest import mock, TestCase
 
 
 @mock.patch("georest.Catalog")
@@ -298,6 +298,16 @@ ADD_FILE_TO_MOSAIC_LAYERTEMPLATE_CONFIG = {
     "layer_name_template": "{productname}_{area}",
 }
 
+ADD_FILE_TO_MOSAIC_FAIL_CONFIG = {
+    "host": "http://host/",
+    "user": "user",
+    "passwd": "passwd",
+    "workspace": "satellite",
+    "geoserver_target_dir": "/mnt/data",
+    "keep_subpath": False,
+    "file_pattern": "{area}_{productname}.tif",
+}
+
 
 @mock.patch("georest.utils.file_in_granules")
 @mock.patch("georest.connect_to_gs_catalog")
@@ -383,6 +393,25 @@ def test_add_file_to_mosaic_failed_request(connect_to_gs_catalog):
     # Check that failed request is handled
     add_granule.side_effect = FailedRequestError
     add_file_to_mosaic(config, fname_in)
+
+
+@mock.patch("georest.connect_to_gs_catalog")
+def test_add_file_to_mosaic_missing_config(connect_to_gs_catalog):
+    """Test that a failed file addition is handled."""
+
+    from georest import add_file_to_mosaic
+
+    config = deepcopy(ADD_FILE_TO_MOSAIC_FAIL_CONFIG)
+
+    add_granule = mock.MagicMock()
+    cat = mock.MagicMock(add_granule=add_granule)
+    connect_to_gs_catalog.return_value = cat
+
+    fname_in = "/path/to/europe_airmass.tif"
+
+    # Check that failed request is handled
+    with TestCase().assertRaises(ValueError):
+        add_file_to_mosaic(config, fname_in)
 
 
 @mock.patch("georest.requests")
