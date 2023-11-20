@@ -15,6 +15,7 @@ import os
 import shutil
 import tempfile
 import zipfile
+import itertools
 
 import trollsift
 import yaml
@@ -127,6 +128,22 @@ def get_exposed_layer_directories(config):
         dirs[layer_name] = path
 
     return dirs
+
+
+def get_layers_for_delete_granules(config):
+    """Get list of layers for deleting granules."""
+    if config.get("layer_id", False):
+        layers = list(config["layers"].values())
+    elif config.get("layer_name_template", False) and config.get("delete_granule_layer_options", False):
+        keys = sorted(config["delete_granule_layer_options"].keys())
+        combinations = list(itertools.product(*[config["delete_granule_layer_options"][k] for k in keys]))
+        options = [dict(zip(keys, l)) for l in combinations]
+        layers = [config["layer_name_template"].format(**opt) for opt in options]
+    else:
+        raise ValueError(
+            "Either 'layer_id' or 'layer_name_template' (with 'delete_granule_layer_options') must be defined in config"
+        )
+    return layers
 
 
 def write_wkt(config, image_fname):

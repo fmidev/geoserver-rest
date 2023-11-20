@@ -364,3 +364,28 @@ def test_convert_file_path_keep_subpath_inverse():
     res = convert_file_path(config, "/geoserver/internal/path/subpath/file.tif", inverse=True, keep_subpath=True)
 
     assert res == "/external/path/subpath/file.tif"
+
+
+def test_get_layers_for_delete_granules():
+    """Test the function that provides layer names for delete granules."""
+    from georest.utils import get_layers_for_delete_granules
+
+    # Case 1: layer_id and layers provided
+    config = {"layer_id": "layer_id", "layers": {"layer_1": "layer_name_1", "layer_2": "layer_name_2"}}
+    res = get_layers_for_delete_granules(config)
+
+    assert res == ["layer_name_1", "layer_name_2"]
+
+    # Case 2: layer_name_template and delete_granule_layer_options provided
+    config = {
+        "layer_name_template": "{opt1}_{opt2}",
+        "delete_granule_layer_options": {"opt1": ["option1_1", "option1_2"], "opt2": ["layer_name_2"]},
+    }
+    res = get_layers_for_delete_granules(config)
+
+    assert res == ["option1_1_layer_name_2", "option1_2_layer_name_2"]
+
+    # Case 3: no layer_id or layer_name_template provided
+    config = {}
+    with pytest.raises(ValueError):
+        get_layers_for_delete_granules(config)

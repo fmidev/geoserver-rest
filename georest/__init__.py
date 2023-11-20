@@ -11,7 +11,6 @@
 import datetime as dt
 import logging
 import os
-import itertools
 
 try:
     import requests
@@ -415,22 +414,6 @@ def delete_granule(cat, workspace, store, fname):
         logger.info("Granule '%s' removed", fname)
 
 
-def get_layers_for_delete_granules(config):
-    """Get list of layers for deleting granules."""
-    if config.get("layer_id", False):
-        layers = list(config["layers"].values())
-    elif config.get("layer_name_template", False) and config.get("delete_granule_layer_options", False):
-        keys = sorted(config["delete_granule_layer_options"].keys())
-        combinations = list(itertools.product(*[config["delete_granule_layer_options"][k] for k in keys]))
-        options = [dict(zip(keys, l)) for l in combinations]
-        layers = [config["layer_name_template"].format(**opt) for opt in options]
-    else:
-        raise ValueError(
-            "Either 'layer_id' or 'layer_name_template' (with 'delete_granule_layer_options') must be defined in config"
-        )
-    return layers
-
-
 def delete_old_files_from_mosaics_and_fs(config):
     """Delete a file from image mosaic.
 
@@ -441,7 +424,7 @@ def delete_old_files_from_mosaics_and_fs(config):
     workspace = config["workspace"]
     max_age = dt.datetime.utcnow() - dt.timedelta(minutes=config["max_age"])
 
-    for store in get_layers_for_delete_granules(config):
+    for store in utils.get_layers_for_delete_granules(config):
         store_obj = cat.get_store(store, workspace)
         logger.debug("Getting coverage for %s", store)
         coverage = get_layer_coverage(cat, store, store_obj)
