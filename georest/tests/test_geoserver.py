@@ -515,7 +515,7 @@ def test_delete_file_from_mosaic_layertemplate(connect_to_gs_catalog):
     assert "call('airmass1_europe', 'satellite')" in str(cat.get_store.call_args_list)
     assert "call('airmass2_europe', 'satellite')" in str(cat.get_store.call_args_list)
     assert "call('airmass1_global', 'satellite')" in str(cat.get_store.call_args_list)
-    assert "call('airmass1_global', 'satellite')" in str(cat.get_store.call_args_list)
+    assert "call('airmass2_global', 'satellite')" in str(cat.get_store.call_args_list)
     cat.list_granules.assert_called()
     cat.delete_granule.assert_not_called()
 
