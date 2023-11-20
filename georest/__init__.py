@@ -372,8 +372,14 @@ def _get_store_name_from_filename(config, fname):
     """Parse store name from filename."""
     file_pattern = config["file_pattern"]
     file_parts = trollsift.parse(file_pattern, os.path.basename(fname))
-    layer_id = file_parts[config["layer_id"]]
-    return config["layers"][layer_id]
+
+    if "layer_id" in config:
+        layer_id = file_parts[config["layer_id"]]
+        return config["layers"][layer_id]
+    if "layer_name_template" in config:
+        layer_name = trollsift.compose(config["layer_name_template"], file_parts)
+        return layer_name
+    raise ValueError("Either 'layer_id' or 'layer_name_template' must be defined in config")
 
 
 def delete_file_from_mosaic(config, fname):
@@ -416,7 +422,8 @@ def delete_old_files_from_mosaics_and_fs(config):
     cat = connect_to_gs_catalog(config)
     workspace = config["workspace"]
     max_age = dt.datetime.utcnow() - dt.timedelta(minutes=config["max_age"])
-    for store in config["layers"].values():
+
+    for store in utils.get_layers_for_delete_granules(config):
         store_obj = cat.get_store(store, workspace)
         logger.debug("Getting coverage for %s", store)
         coverage = get_layer_coverage(cat, store, store_obj)

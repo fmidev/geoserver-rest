@@ -31,6 +31,9 @@ file_pattern: "{start_time:%Y%m%d_%H%M}_{platform_name}_{areaname}_{productname}
 
 # The filename part to use for layer identification
 layer_id: productname
+# OR use a template for the layer name with items from file_pattern
+# if layer_id given, this is ignored
+# layer_name_template: optclass_{radar_name}
 
 # For delete_old_granules_and_files.py
 #    Maximum age for granules, in minutes
@@ -51,6 +54,24 @@ layer_id: productname
 layers:
   airmass: satellite_geo_europe_seviri-15min_airmass
   ash: satellite_geo_europe_seviri-15min_ash
+
+# Layer options for delete granule layers when using layer_name_template instead of layer_id
+# delete_granule_layer_options:
+#   radar:
+#     [
+#       fivim,
+#       fikan,
+#       fikes,
+#       fikor,
+#       fikuo,
+#       filuo,
+#       finur,
+#       fipet,
+#       fiuta,
+#       fianj,
+#       fivih,
+#     ]
+#   quantity: [dbzh, vrad]
 
 log_config:
   version: 1
