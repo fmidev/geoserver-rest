@@ -287,6 +287,17 @@ ADD_FILE_TO_MOSAIC_CONFIG = {
     "layers": {"airmass": "airmass_store"},
 }
 
+ADD_FILE_TO_MOSAIC_LAYERTEMPLATE_CONFIG = {
+    "host": "http://host/",
+    "user": "user",
+    "passwd": "passwd",
+    "workspace": "satellite",
+    "geoserver_target_dir": "/mnt/data",
+    "keep_subpath": False,
+    "file_pattern": "{area}_{productname}.tif",
+    "layer_name_template": "{productname}_{area}",
+}
+
 
 @mock.patch("georest.utils.file_in_granules")
 @mock.patch("georest.connect_to_gs_catalog")
@@ -307,8 +318,30 @@ def test_add_file_to_mosaic(connect_to_gs_catalog, file_in_granules):
     add_file_to_mosaic(config, fname_in)
 
     connect_to_gs_catalog.assert_called_with(config)
-    add_granule.assert_called_with("/mnt/data/europe_airmass.tif",
-                                   "airmass_store", "satellite")
+    add_granule.assert_called_with("/mnt/data/europe_airmass.tif", "airmass_store", "satellite")
+    add_file_to_mosaic(config, fname_in)
+
+
+@mock.patch("georest.utils.file_in_granules")
+@mock.patch("georest.connect_to_gs_catalog")
+def test_add_file_to_mosaic_layertemplate(connect_to_gs_catalog, file_in_granules):
+    """Test adding files to image mosaic."""
+    from georest import add_file_to_mosaic
+
+    config = deepcopy(ADD_FILE_TO_MOSAIC_LAYERTEMPLATE_CONFIG)
+
+    # Returns False if the file isn't in database
+    file_in_granules.return_value = False
+    add_granule = mock.MagicMock()
+    cat = mock.MagicMock(add_granule=add_granule)
+    connect_to_gs_catalog.return_value = cat
+
+    fname_in = "/path/to/europe_airmass.tif"
+
+    add_file_to_mosaic(config, fname_in)
+
+    connect_to_gs_catalog.assert_called_with(config)
+    add_granule.assert_called_with("/mnt/data/europe_airmass.tif", "airmass_europe", "satellite")
     add_file_to_mosaic(config, fname_in)
 
 
@@ -409,10 +442,48 @@ def test_delete_file_from_mosaic(connect_to_gs_catalog):
     cat.delete_granule.assert_not_called()
 
     # This is the structure returned by cat.list_granules()
-    granules = {"features":
-                [{"properties": {"location": "/mnt/data/europe_airmass.tif"},
-                  "id": "file-id"}]
-                }
+    granules = {"features": [{"properties": {"location": "/mnt/data/europe_airmass.tif"}, "id": "file-id"}]}
+    cat.list_granules.return_value = granules
+
+    delete_file_from_mosaic(config, fname)
+    cat.delete_granule.assert_called()
+
+
+@mock.patch("georest.connect_to_gs_catalog")
+def test_delete_file_from_mosaic_layertemplate(connect_to_gs_catalog):
+    """Test deleting files from image mosaic."""
+    from georest import delete_file_from_mosaic
+
+    # This is the structure returned by cat.mosaic_coverages()
+    coverages = {
+        "coverages": {
+            "coverage": [
+                {"name": "airmass_europe"},
+            ]
+        }
+    }
+    cat = mock.MagicMock()
+    cat.mosaic_coverages.return_value = coverages
+    connect_to_gs_catalog.return_value = cat
+
+    config = {
+        "workspace": "satellite",
+        "geoserver_target_dir": "/mnt/data",
+        "file_pattern": "{area}_{productname}.tif",
+        "layer_name_template": "{productname}_{area}",
+        "delete_granule_layer_options": {"area": ["europe"], "productname": ["airmass"]},
+    }
+    fname = "europe_airmass.tif"
+
+    delete_file_from_mosaic(config, fname)
+
+    connect_to_gs_catalog.assert_called_with(config)
+    cat.get_store.assert_called_with("airmass_europe", "satellite")
+    cat.list_granules.assert_called()
+    cat.delete_granule.assert_not_called()
+
+    # This is the structure returned by cat.list_granules()
+    granules = {"features": [{"properties": {"location": "/mnt/data/europe_airmass.tif"}, "id": "file-id"}]}
     cat.list_granules.return_value = granules
 
     delete_file_from_mosaic(config, fname)
