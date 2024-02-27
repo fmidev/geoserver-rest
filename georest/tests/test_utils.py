@@ -44,6 +44,7 @@ def test_read_config_credentials_in_env():
 
     os.environ["GEOSERVER_USER"] = "user1"
     os.environ["GEOSERVER_PASSWORD"] = "passwd1"
+    os.environ["GEOSERVER_HOST"] = "host1"
     config = """
         foo: bar
     """
@@ -55,6 +56,7 @@ def test_read_config_credentials_in_env():
         assert res["foo"] == "bar"
         assert res["user"] == "user1"
         assert res["passwd"] == "passwd1"
+        assert res["host"] == "host1"
 
 
 def test_read_config_default_credentials():
@@ -66,6 +68,7 @@ def test_read_config_default_credentials():
 
     os.environ.pop("GEOSERVER_USER", None)
     os.environ.pop("GEOSERVER_PASSWORD", None)
+    os.environ.pop("GEOSERVER_HOST", None)
 
     config = """
         foo: bar
@@ -78,6 +81,7 @@ def test_read_config_default_credentials():
         assert res["foo"] == "bar"
         assert res["user"] == "admin"
         assert res["passwd"] == "geoserver"
+        assert res["host"] == "http://localhost:8080/geoserver/rest"
 
 
 def test_write_wkt():

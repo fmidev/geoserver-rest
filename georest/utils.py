@@ -33,6 +33,8 @@ def read_config(fname):
         config["user"] = os.environ.get("GEOSERVER_USER", "admin")
     if "passwd" not in config:
         config["passwd"] = os.environ.get("GEOSERVER_PASSWORD", "geoserver")
+    if "host" not in config:
+        config["host"] = os.environ.get("GEOSERVER_HOST", "http://localhost:8080/geoserver/rest")
     return config
 
 
