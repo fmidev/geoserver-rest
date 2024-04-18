@@ -22,7 +22,7 @@ from geoserver.support import DimensionInfo, write_string
 
 from georest import utils
 
-__version__ = "0.9.1"
+__version__ = "0.9.1.1"
 
 # These layer attributes can be set
 LAYER_ATTRIBUTES = ["title", "abstract", "keywords"]
