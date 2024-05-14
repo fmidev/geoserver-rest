@@ -86,7 +86,12 @@ def _create_extra_files(tempdir, files):
 CREATE_LAYERS_CONFIG = {
     "host": "host",
     "workspace": "workspace",
-    "common_items": {"cache_age_max": 86400, "projection_policy": "FORCE_DECLARED"},
+    "common_items": {
+        "cache_age_max": 86400,
+        "projection_policy": "FORCE_DECLARED",
+        "latlon_bbox": [10, 15, 20, 25, "EPSG:4326"],
+        "native_bbox": [1000, 1500, 2000, 2500, "EPSG:3067"],
+    },
     "properties": {"foo": {"bar": "baz"}},
     "dimensions": {
         "time_dimension": {

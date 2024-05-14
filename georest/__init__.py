@@ -18,7 +18,7 @@ except ImportError:
     requests = None
 import trollsift
 from geoserver.catalog import Catalog, FailedRequestError
-from geoserver.support import DimensionInfo, write_string
+from geoserver.support import DimensionInfo, write_string, write_bbox
 
 from georest import utils
 
@@ -127,6 +127,16 @@ def add_layer_metadata(cat, workspace, layer_name, dimensions, meta, style=None)
     coverage = _add_cache_age_max(coverage, meta.get("cache_age_max", None))
     coverage = _add_projection_policy(coverage, meta.get("projection_policy", None))
 
+    # Add bounding boxes
+    coverage = _add_latlon_bbox(coverage, meta.get("latlon_bbox", None))
+    coverage = _add_native_bbox(coverage, meta.get("native_bbox", None))
+
+    # It seems that changing the native bbox somehow triggers the calculation
+    # of latlon bbox, so if both are specified we need to save twice
+    # to actually store both values
+    if "latlon_bbox" in meta and "native_bbox" in meta:
+        cat.save(coverage)
+
     # Save the added metadata
     cat.save(coverage)
 
@@ -229,6 +239,20 @@ def _add_projection_policy(coverage, projection_policy):
     coverage.dirty["projectionPolicy"] = projection_policy
     coverage.writers["projectionPolicy"] = write_string("projectionPolicy")
 
+    return coverage
+
+
+def _add_latlon_bbox(coverage, latlon_bbox):
+    if latlon_bbox is None:
+        return coverage
+    coverage.latlon_bbox = latlon_bbox
+    return coverage
+
+
+def _add_native_bbox(coverage, native_bbox):
+    if native_bbox is None:
+        return coverage
+    coverage.native_bbox = native_bbox
     return coverage
 
 
