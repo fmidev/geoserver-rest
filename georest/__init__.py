@@ -456,8 +456,10 @@ def _delete_files_from_fs(config, gs_location):
 def _delete_file_from_fs(config, fs_path, replace_extension=None):
     if replace_extension:
         fs_path = os.path.splitext(fs_path)[0] + "." + replace_extension
-    if os.path.exists(fs_path):
+    try:
+        # Run inside try-except block instead of checking if file exists
+        # in case file is deleted between the check and the actual deletion
         os.remove(fs_path)
         logger.info("File %s deleted", fs_path)
-    elif replace_extension is None:
+    except FileNotFoundError:
         logger.warning("File %s not available on filesystem", fs_path)
