@@ -9,13 +9,13 @@
 
 import datetime as dt
 import glob
+import itertools
 import logging
 import logging.config
 import os
 import shutil
 import tempfile
 import zipfile
-import itertools
 
 import trollsift
 import yaml
@@ -139,7 +139,7 @@ def get_layers_for_delete_granules(config):
     if config.get("layer_name_template", False) and config.get("delete_granule_layer_options", False):
         keys = sorted(config["delete_granule_layer_options"].keys())
         combinations = list(itertools.product(*[config["delete_granule_layer_options"][k] for k in keys]))
-        options = [dict(zip(keys, l)) for l in combinations]
+        options = [dict(zip(keys, layer)) for layer in combinations]
         return [config["layer_name_template"].format(**opt) for opt in options]
     raise ValueError(
         "Either 'layer_id' or 'layer_name_template' (with 'delete_granule_layer_options') must be defined in config"
@@ -271,7 +271,7 @@ def _posttroll_adder_loop(config, Subscribe, restart_timeout):
                         return return_value
                 if msg is None:
                     if sigterm_caught:
-                        return False
+                        break
                     continue
                 logger.debug("New message received: %s", str(msg))
                 latest_message_time = dt.datetime.utcnow()
