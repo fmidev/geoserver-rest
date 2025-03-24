@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 #
 # Author(s):
 #
@@ -21,8 +20,6 @@ from geoserver.catalog import Catalog, FailedRequestError
 from geoserver.support import DimensionInfo, write_string, write_bbox
 
 from georest import utils
-
-__version__ = "0.8.1"
 
 # These layer attributes can be set
 LAYER_ATTRIBUTES = ["title", "abstract", "keywords"]
