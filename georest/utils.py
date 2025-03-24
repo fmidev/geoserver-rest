@@ -242,7 +242,7 @@ def _posttroll_adder_loop(config, Subscribe, restart_timeout):
     sigterm_caught = False
 
     def _signal_handler(signum, frame):
-        nonlocal keep_looping
+        nonlocal sigterm_caught
         logger.info("Caught SIGTERM, stop posttroll adder when there are no new messages.")
         sigterm_caught = True
 
