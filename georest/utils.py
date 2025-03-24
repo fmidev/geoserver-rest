@@ -237,6 +237,15 @@ def _posttroll_adder_loop(config, Subscribe, restart_timeout):
 
     Return False if no messages have been received within given time.
     """
+    import signal
+
+    sigterm_caught = False
+
+    def _signal_handler(signum, frame):
+        nonlocal keep_looping
+        logger.info("Caught SIGTERM, stop posttroll adder when there are no new messages.")
+        sigterm_caught = True
+
     cat = georest.connect_to_gs_catalog(config)
 
     latest_message_time = dt.datetime.utcnow()
@@ -259,6 +268,8 @@ def _posttroll_adder_loop(config, Subscribe, restart_timeout):
                                      time_since_last_msg)
                         return return_value
                 if msg is None:
+                    if sigterm_caught:
+                        return False
                     continue
                 logger.debug("New message received: %s", str(msg))
                 latest_message_time = dt.datetime.utcnow()
