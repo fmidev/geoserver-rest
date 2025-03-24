@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 #
 # Author(s):
 #
@@ -7,21 +6,18 @@
 
 """Add a file (granule) to a Geoserver ImageMosaic layer via REST API."""
 
-import sys
 import logging
+import sys
 
-import georest
+from georest import add_file_to_mosaic
+from georest.utils import read_config
 
 
-def main():
+def run():
     """Add granule."""
-    config = georest.utils.read_config(sys.argv[1])
+    config = read_config(sys.argv[1])
 
     if "log_config" in config:
         logging.config.dictConfig(config["log_config"])
 
-    georest.add_file_to_mosaic(config, sys.argv[2])
-
-
-if __name__ == "__main__":
-    main()
+    add_file_to_mosaic(config, sys.argv[2])

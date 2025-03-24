@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 #
 # Author(s):
 #
@@ -7,25 +6,21 @@
 
 """Listen to Posttroll messages and add the files to Geoserver layer."""
 
-import sys
 import logging
-
-import georest
+import sys
 
 from posttroll.subscriber import Subscribe
 
+from georest.utils import read_config, run_posttroll_adder
 
-def main():
-    """Main()"""
-    config = georest.utils.read_config(sys.argv[1])
+
+def run():
+    """Run Posttroll adder."""
+    config = read_config(sys.argv[1])
 
     if "log_config" in config:
         logging.config.dictConfig(config["log_config"])
     logger = logging.getLogger("posttroll_adder")
     logger.info("Posttroll Geoserver updater started")
 
-    georest.utils.run_posttroll_adder(config, Subscribe)
-
-
-if __name__ == "__main__":
-    main()
+    run_posttroll_adder(config, Subscribe)

@@ -1,0 +1,49 @@
+[project]
+
+name = "georest"
+description = "Python package for interacting with Geoserver using REST API"
+readme = "README.md"
+authors = [
+    { name = "Panu Lahtinen", email = "panu.lahtinen@fmi.fi" },
+    { name = "Jenna Ritvanen", email = "jenna.ritvanen@fmi.fi" },
+]
+requires-python = ">=3.9"
+dependencies = [
+    "pyyaml",
+    "geoserver-restconfig",
+    "trollsift",
+]
+dynamic = ["version"]
+
+[project.optional-dependencies]
+posttroll = ["posttroll", "pyzmq"]
+s3 = ["requests"]
+
+[project.scripts]
+"add_granule.py" = "georest.add_granule:run"
+"add_s3_granule.py" = "georest.add_s3_granule:run"
+"create_layer_directories.py" = "georest.create_layer_directories:run"
+"create_layers.py" = "georest.create_layers:run"
+"create_s3_layers.py" = "georest.create_s3_layers:run"
+"delete_granule.py" = "georest.delete_granule:run"
+"delete_old_granules_and_files.py" = "georest.delete_old_granules_and_files:run"
+"posttroll_adder.py" = "georest.posttroll_adder:run"
+
+[build-system]
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["georest"]
+
+[tool.hatch.version]
+source = "vcs"
+
+[tool.hatch.build.hooks.vcs]
+version-file = "georest/version.py"
+
+[tool.ruff]
+line-length = 120

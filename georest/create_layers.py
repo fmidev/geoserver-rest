@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 #
 # Author(s):
 #
@@ -7,22 +6,19 @@
 
 """Create Geoserver ImageMosaic layers via REST API."""
 
-import sys
 import logging
+import sys
 
-import georest
+from georest import create_layers
+from georest.utils import read_config
 
 
-def main():
-    """Main()"""
-    config = georest.utils.read_config(sys.argv[1])
+def run():
+    """Create layers."""
+    config = read_config(sys.argv[1])
 
     if "log_config" in config:
         logging.config.dictConfig(config["log_config"])
     logger = logging.getLogger("create_layers")
-    georest.create_layers(config)
+    create_layers(config)
     logger.info("Layer creation finished")
-
-
-if __name__ == "__main__":
-    main()
