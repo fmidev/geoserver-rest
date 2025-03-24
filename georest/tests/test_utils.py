@@ -329,6 +329,34 @@ def test_run_posttroll_adder_s3(connect_to_gs_catalog, add_s3_granule,
     )
 
 
+@mock.patch("georest.connect_to_gs_catalog")
+def test_run_posttroll_adder_sigterm(connect_to_gs_catalog):
+    """Test sending SIGTERM to posttroll adder works."""
+    import os
+    import signal
+    import time
+    from multiprocessing import Process
+
+    from georest.utils import run_posttroll_adder
+
+    config = {"workspace": "satellite",
+              "topics": ["/topic1", "/topic2"],
+              "layers": {"airmass": "airmass_layer_name"},
+              "filesystem": "s3",
+              "host": "hostname",
+              }
+
+    Subscribe = mock.MagicMock()
+    Subscribe.return_value.__enter__.return_value.recv.return_value = [None]
+
+    proc = Process(target=run_posttroll_adder, args=(config, Subscribe))
+    proc.start()
+    time.sleep(1)
+    os.kill(proc.pid, signal.SIGTERM)
+
+    assert proc.exitcode == 0
+
+
 def test_convert_file_path():
     """Test the file path conversion for the default case."""
     from georest.utils import convert_file_path
