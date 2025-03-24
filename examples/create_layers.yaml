@@ -40,6 +40,9 @@ common_items:
   # cache_age_max: 86400
   # Set projection policy for the layer
   projection_policy: FORCE_DECLARED
+  # bounding boxes as [minx, miny, maxx, maxy, srs]
+  # latlon_bbox: [15.3, 42.7, 57.1, 70.8, "EPSG:4326"]
+  # native_bbox: [-208000, 1072000, 6390000, 7926000, "EPSG:3067"]
 
 # Set the default and additional styles to the layer. The styles should already exist
 style:
