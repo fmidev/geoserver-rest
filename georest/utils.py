@@ -246,6 +246,8 @@ def _posttroll_adder_loop(config, Subscribe, restart_timeout):
         logger.info("Caught SIGTERM, stop posttroll adder when there are no new messages.")
         sigterm_caught = True
 
+    signal.signal(signal.SIGTERM, _signal_handler)
+
     cat = georest.connect_to_gs_catalog(config)
 
     latest_message_time = dt.datetime.utcnow()
