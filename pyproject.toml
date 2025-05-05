@@ -21,12 +21,12 @@ s3 = ["requests"]
 
 [project.scripts]
 "add_granule.py" = "georest.granule_add:run"
-"add_s3_granule.py" = "georest.add_s3_granule:run"
+"add_s3_granule.py" = "georest.granule_add_s3:run"
 "create_layer_directories.py" = "georest.create_layer_directories:run"
-"create_layers.py" = "georest.create_layers:run"
-"create_s3_layers.py" = "georest.create_s3_layers:run"
-"delete_granule.py" = "georest.delete_granule:run"
-"delete_old_granules_and_files.py" = "georest.delete_old_granules_and_files:run"
+"create_layers.py" = "georest.layers_create:run"
+"create_s3_layers.py" = "georest.s3_layers_create:run"
+"delete_granule.py" = "georest.granule_delete:run"
+"delete_old_granules_and_files.py" = "georest.old_granules_and_files_delete:run"
 "posttroll_adder.py" = "georest.posttroll_adder:run"
 
 [build-system]
