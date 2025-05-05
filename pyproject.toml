@@ -20,7 +20,7 @@ posttroll = ["posttroll", "pyzmq"]
 s3 = ["requests"]
 
 [project.scripts]
-"add_granule.py" = "georest.add_granule:run"
+"add_granule.py" = "georest.granule_add:run"
 "add_s3_granule.py" = "georest.add_s3_granule:run"
 "create_layer_directories.py" = "georest.create_layer_directories:run"
 "create_layers.py" = "georest.create_layers:run"
