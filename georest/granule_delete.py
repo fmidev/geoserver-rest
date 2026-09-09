@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 #
 # Author(s):
 #
@@ -7,22 +6,19 @@
 
 """Delete a grenule from Geoserver ImageMosaic layer via REST API."""
 
-import sys
 import logging
+import sys
 
-import georest
+from georest import delete_file_from_mosaic
+from georest.utils import read_config
 
 
-def main():
+def run():
     """Delete granule."""
-    config = georest.utils.read_config(sys.argv[1])
+    config = read_config(sys.argv[1])
 
     if "log_config" in config:
         logging.config.dictConfig(config["log_config"])
 
     fname = sys.argv[2]
-    georest.delete_file_from_mosaic(config, fname)
-
-
-if __name__ == "__main__":
-    main()
+    delete_file_from_mosaic(config, fname)

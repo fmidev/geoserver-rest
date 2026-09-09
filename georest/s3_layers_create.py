@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 #
 # Author(s):
 #
@@ -10,19 +9,16 @@
 import logging
 import sys
 
-import georest
+from georest import create_s3_layers
+from georest.utils import read_config
 
 
-def main():
+def run():
     """Run S3 layer creation."""
-    config = georest.utils.read_config(sys.argv[1])
+    config = read_config(sys.argv[1])
 
     if "log_config" in config:
         logging.config.dictConfig(config["log_config"])
     logger = logging.getLogger("create_s3_layers")
-    georest.create_s3_layers(config)
+    create_s3_layers(config)
     logger.info("Layer creation finished")
-
-
-if __name__ == "__main__":
-    main()

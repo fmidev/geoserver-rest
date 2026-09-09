@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 #
 # Author(s):
 #
@@ -7,13 +6,13 @@
 
 """Create Geoserver directory for eac configured layer."""
 
-import sys
 import os
+import sys
 
-from georest.utils import read_config, get_exposed_layer_directories
+from georest.utils import get_exposed_layer_directories, read_config
 
 
-def main():
+def run():
     """Create Geoserver layer director(y|ies)."""
     config = read_config(sys.argv[1])
 
@@ -24,7 +23,3 @@ def main():
             os.makedirs(path)
         except FileExistsError:
             pass
-
-
-if __name__ == "__main__":
-    main()
